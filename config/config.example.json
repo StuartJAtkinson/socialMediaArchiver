@@ -1,0 +1,41 @@
+{
+  "sources": [
+    {
+      "id": "twitter_user_1",
+      "platform": "twitter",
+      "account": "username_to_archive",
+      "scrape_method": "nitter",
+      "nitter_instance": "https://nitter.net",
+      "comment": "Alternative methods: 'nitter' (RSS), 'api' (Twitter API), 'html_scrape' (fallback)",
+      "batch_config": {
+        "batch_size": 50,
+        "scrape_interval_days": 7,
+        "comment": "Will scrape 50 posts per run, going back 7 days each batch"
+      },
+      "media_download": {
+        "images": true,
+        "videos": false,
+        "comment": "Set to true to download media files locally"
+      },
+      "outputs": {
+        "local": {
+          "enabled": true,
+          "path": "./archives",
+          "comment": "Writes to: ./archives/twitter/username/"
+        },
+        "cloud": {
+          "enabled": false,
+          "comment": "ROADMAP: Cloud storage (S3, GCS, Azure)"
+        },
+        "mirror_post": {
+          "enabled": false,
+          "comment": "ROADMAP: Post to other social media platforms"
+        },
+        "slow_mirror_post": {
+          "enabled": false,
+          "comment": "ROADMAP: Post slowly to avoid rate limits"
+        }
+      }
+    }
+  ]
+}
