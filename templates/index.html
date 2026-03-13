@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Archiver - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            text-align: center;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .control-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .control-panel h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .archive-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .archive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .archive-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .account-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .account-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .account-card .platform {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .account-card .stats {
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .account-card .view-btn {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        .account-card .view-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Social Media Archiver</h1>
+            <p>Archive and view your social media posts locally</p>
+        </div>
+        
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <h3>Accounts</h3>
+                <div class="number" id="total-accounts">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Posts</h3>
+                <div class="number" id="total-posts">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Images</h3>
+                <div class="number" id="total-images">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Videos</h3>
+                <div class="number" id="total-videos">-</div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <h2>🚀 Archive Control</h2>
+            <button id="archive-btn" class="archive-btn" onclick="startArchiving()">
+                Start Archiving
+            </button>
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
+        
+        <h2 style="margin-bottom: 20px;">📁 Archived Accounts</h2>
+        <div id="accounts-container">
+            <div class="loading">Loading accounts...</div>
+        </div>
+    </div>
+
+    <script>
+        let statusInterval;
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                document.getElementById('total-accounts').textContent = data.total_accounts;
+                document.getElementById('total-posts').textContent = data.total_posts;
+                document.getElementById('total-images').textContent = data.total_images;
+                document.getElementById('total-videos').textContent = data.total_videos;
+                
+                renderAccounts(data.accounts);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function renderAccounts(accounts) {
+            const container = document.getElementById('accounts-container');
+            
+            if (accounts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No archived accounts yet</h3>
+                        <p>Click "Start Archiving" to begin archiving your configured accounts.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '<div class="accounts-grid" id="accounts-grid"></div>';
+            const grid = document.getElementById('accounts-grid');
+            
+            accounts.forEach(account => {
+                const card = document.createElement('div');
+                card.className = 'account-card';
+                card.innerHTML = `
+                    <span class="platform">${account.platform}</span>
+                    <h3>@${account.account}</h3>
+                    <div class="stats">Loading stats...</div>
+                    <a href="/account/${account.platform}/${account.account}" class="view-btn">View Posts</a>
+                `;
+                grid.appendChild(card);
+                
+                // Load stats for this account
+                loadAccountStats(account.platform, account.account, card.querySelector('.stats'));
+            });
+        }
+
+        async function loadAccountStats(platform, account, statsElement) {
+            try {
+                // This would need a new API endpoint, for now just show basic info
+                statsElement.textContent = `Platform: ${platform}`;
+            } catch (error) {
+                statsElement.textContent = 'Stats unavailable';
+            }
+        }
+
+        async function startArchiving() {
+            const btn = document.getElementById('archive-btn');
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            btn.textContent = 'Starting...';
+            
+            try {
+                const response = await fetch('/api/archive/start', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.status === 'started') {
+                    status.style.display = 'block';
+                    status.className = 'status running';
+                    status.textContent = 'Archiving in progress...';
+                    
+                    // Start polling for status
+                    statusInterval = setInterval(checkArchiveStatus, 2000);
+                } else if (data.status === 'already_running') {
+                    status.style.display = 'block';
+                    status.className = 'status running';
+                    status.textContent = 'Archiving already running...';
+                    statusInterval = setInterval(checkArchiveStatus, 2000);
+                }
+            } catch (error) {
+                status.style.display = 'block';
+                status.className = 'status';
+                status.style.background = '#f8d7da';
+                status.style.color = '#721c24';
+                status.textContent = 'Error starting archive: ' + error.message;
+                btn.disabled = false;
+                btn.textContent = 'Start Archiving';
+            }
+        }
+
+        async function checkArchiveStatus() {
+            try {
+                const response = await fetch('/api/archive/status');
+                const data = await response.json();
+                
+                const btn = document.getElementById('archive-btn');
+                const status = document.getElementById('status');
+                
+                if (data.is_archiving) {
+                    btn.disabled = true;
+                    btn.textContent = 'Archiving...';
+                    status.style.display = 'block';
+                    status.className = 'status running';
+                    status.textContent = 'Archiving in progress...';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Start Archiving';
+                    status.style.display = 'none';
+                    clearInterval(statusInterval);
+                    
+                    // Reload stats and accounts
+                    loadStats();
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+        }
+
+        // Load initial data
+        loadStats();
+        
+        // Check archive status on page load
+        checkArchiveStatus();
+    </script>
+</body>
+</html>
