@@ -1,0 +1,109 @@
+# ByteByteGo Community Post Scraper — Configuration
+
+# ─── Scraping ───────────────────────────────────────────────────────────────
+# Delay between posts (seconds). Be respectful: 2–5s is sane for thorough scraping.
+post_delay: 2.0
+
+# Delay between channel scrapes (seconds).
+channel_delay: 5.0
+
+# Max posts per channel (0 = all, YouTube caps at ~200 anyway).
+max_posts: 5
+
+# Retry settings
+max_retries: 3
+retry_delay: 5.0
+
+# Request timeout for HTTP requests (both post-archiver and image downloads)
+timeout: 30
+
+# Enable Playwright fallback (if HTTP scraping fails or is blocked)
+# Requires Playwright to be installed: pip install playwright
+# NOTE: Playwright browser installs may fail in WSL. Ensure you have a working
+# Playwright setup on your host OS (Windows) if enabling this.
+playwright_fallback: false
+
+# ─── Date filtering ─────────────────────────────────────────────────────────
+# Only scrape posts published AFTER this date (ISO format, empty = no filter).
+# Example: 2024-01-01T00:00:00
+date_after: ""
+
+# Only scrape posts published BEFORE this date (ISO format, empty = no filter).
+# Example: 2025-01-01T00:00:00
+date_before: ""
+
+# ─── Content ─────────────────────────────────────────────────────────────────
+# Download images (gifs, jpgs, etc.)
+download_images: true
+
+# Download comments
+download_comments: true
+max_comments_per_post: 100
+max_replies_per_comment: 200
+
+# ─── Output ─────────────────────────────────────────────────────────────────
+output_dir: "./output"
+images_dir: "./output/images"
+# Cache for post-archiver (optional, managed by post-archiver itself)
+# cache_dir: "./output/.cache"
+log_file: "./output/scraper.log"
+
+# ─── Proxy / Tor ────────────────────────────────────────────────────────────
+# Set proxy_url to enable proxy rotation (http/socks5).
+# Examples:
+#   http://proxyhost:8080
+#   socks5://proxyhost:1080
+#   http://user:***@proxyhost:8080
+proxy_url: ""
+
+# How many posts to process before switching proxy (0 = never switch).
+# Set to e.g. 50 if you have a proxy pool and want efficient rotation.
+proxy_rotation_every: 0
+
+# Tor control port (leave empty to disable).
+# Requires Stem library: pip install stem
+tor_control_port: 0
+tor_password: ""
+
+# ─── Resume ─────────────────────────────────────────────────────────────────
+# Store checkpoint after each post so interrupted runs can resume.
+enable_checkpoint: true
+checkpoint_file: "./output/.checkpoint.json"
+
+# ─── Logging ─────────────────────────────────────────────────────────────────
+verbose: true
+debug: false
+
+# ─── Per-source settings ─────────────────────────────────────────────────────
+# Targets live in config/targets.yaml. This block holds per-connector options.
+# Secrets are read from environment variables FIRST, then these values, so you
+# can keep credentials out of the file (e.g. set REDDIT_CLIENT_ID, FB_GRAPH_TOKEN).
+sources:
+  youtube_community:
+    max_posts: 5
+    download_comments: true
+    max_comments_per_post: 100
+    max_replies_per_comment: 200
+
+  reddit:
+    # Create a free "script" app at https://www.reddit.com/prefs/apps to get these.
+    # Leave blank to fall back to public .rss feeds (no auth, fewer fields).
+    client_id: ""        # or env REDDIT_CLIENT_ID
+    client_secret: ""    # or env REDDIT_CLIENT_SECRET
+    user_agent: "bytebytego-grabber/0.5"
+    sort: "new"          # new | hot | top | rising
+    max_posts: 50
+    with_comments: true
+    max_comments_per_post: 100
+
+  rss:
+    max_items: 50
+
+  facebook:
+    # Tier 1: Graph API token (only reaches Pages/Groups it is authorised for).
+    graph_token: ""      # or env FB_GRAPH_TOKEN
+    # Tier 2: saved browser session (run: python main.py facebook-login).
+    storage_state: "./config/fb_state.json"
+    headless: true
+    max_posts: 50
+    scroll_rounds: 8

@@ -1,0 +1,7 @@
+# Channels to scrape (one per line)
+# Formats: @handle, channel_id, or full URL
+# Lines starting with # are comments
+# Empty lines are ignored
+
+@ByteByteGo
+#UCsvqG1TQy3vS9qKgzjNQ8_A

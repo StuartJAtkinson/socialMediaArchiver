@@ -1,3 +1,22 @@
-feedparser>=6.0.10
-requests>=2.31.0
+# ─── Web dashboard ───────────────────────────────────────────────────────────
 flask>=2.3.0
+
+# ─── HTTP / feeds ────────────────────────────────────────────────────────────
+requests>=2.31.0
+feedparser>=6.0.10
+
+# ─── Configuration ───────────────────────────────────────────────────────────
+pyyaml
+
+# ─── YouTube (wraps post-archiver-improved) ──────────────────────────────────
+post-archiver-improved>=0.4.0
+
+# ─── Reddit official API (optional — falls back to public .rss if missing) ──
+praw>=7.7
+
+# ─── Facebook browser tiers + YouTube fallback ──────────────────────────────
+# After install run: playwright install chromium
+playwright>=1.40
+
+# ─── Tor proxy rotation (optional) ───────────────────────────────────────────
+# stem
