@@ -1,0 +1,18 @@
+# Virtual environment
+.venv/
+
+# Crawl output and checkpoints
+output/
+
+# Secrets / sessions
+config/fb_state.json
+config/config.local.yaml
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Logs
+*.log

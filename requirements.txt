@@ -1,0 +1,21 @@
+# Core YouTube engine
+post-archiver-improved>=0.4.0
+
+# Configuration
+pyyaml
+
+# RSS / Atom feeds (rss connector + reddit .rss fallback)
+feedparser>=6.0
+
+# Reddit official API (optional — falls back to .rss if missing/no creds)
+praw>=7.7
+
+# Facebook Graph API tier
+requests>=2.31
+
+# Browser tiers (Facebook auth/public scraping, YouTube fallback)
+# After install run: playwright install chromium
+playwright>=1.40
+
+# Tor proxy rotation (optional — pip install if using Tor)
+# stem
