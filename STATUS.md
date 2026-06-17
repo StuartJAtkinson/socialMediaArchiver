@@ -37,6 +37,40 @@
 
 ---
 
+## Multi-Source Orchestrator ✅ COMPLETE (merged from bytebytego-grabber)
+
+A source-agnostic crawler spine now sits alongside the legacy Phase 1 stack,
+normalising every record to a shared `Item` schema (`uid = source:id`).
+
+### Core plumbing (`core/`)
+- [x] Normalised `Item` / `ItemAuthor` / `MediaItem` model
+- [x] Checkpoint / resume state (with legacy-YouTube migration)
+- [x] Rate limiting — inter-request jitter, Tor/proxy rotation
+- [x] Filesystem storage writer + media downloader
+- [x] Shared RSS/Atom feed parsing
+- [x] Source registry (name → connector class) + generic crawl loop
+- [x] Typed errors (`RateLimitError`, `AuthError`, `ProviderUnavailable`)
+
+### Connectors (`connectors/`)
+- [x] YouTube Community (wraps `post-archiver-improved`)
+- [x] Reddit — praw → public `.rss` fallback (fallback logs at WARNING)
+- [x] Generic RSS/Atom (feedparser)
+- [x] Facebook — Graph API → auth-browser → public-browser tiered fallback
+- [x] Tiered-fallback `Provider` base with dedup by `Item.uid`
+
+### Orchestrator CLI (`main.py`)
+- [x] `crawl` / `status` / `resume` / `facebook-login` subcommands
+- [x] Per-source config blocks (`config/config.yaml`)
+- [x] `{source, target}` target list (`config/targets.yaml`)
+- [x] Runtime overrides (`--proxy-url`, `--verbose`)
+- [x] Secrets via env vars first, then YAML
+
+> Note: this orchestrator *archives* (reads) sources. The Phase 3/4 items
+> below are about *mirroring* (posting **out** to platforms) — a different
+> direction — and remain roadmap.
+
+---
+
 ## Phase 2: Cloud Storage 🔄 ROADMAP
 
 ### S3 (AWS)
@@ -245,12 +279,19 @@
 
 ## Version History
 
-### v0.1.0 (Current)
+### v0.1.0
 - Initial release with Phase 1 complete
 - Nitter RSS scraping
 - Local JSONL storage
 - Smart batch processing
 - Optional media downloads
+
+### v0.5.0 (Current — orchestrator import)
+- Multi-source crawler spine (`core/` + `connectors/`)
+- YouTube Community, Reddit, RSS/Atom, Facebook connectors
+- Normalised `Item` schema, checkpoint/resume, proxy/Tor rotation
+- New `main.py` CLI (crawl / status / resume / facebook-login)
+- Legacy Phase 1 Twitter path preserved under `src/`
 
 ### Planned Versions
 - v0.2.0 - Cloud storage (Phase 2)
@@ -329,5 +370,6 @@
 
 ---
 
-**Last Updated**: March 12, 2026
-**Status**: Phase 1 Complete, Ready for Phase 2 Planning
+**Last Updated**: June 17, 2026
+**Status**: Phase 1 ✅ + Multi-Source Orchestrator ✅ merged. Next: Twitter
+connector port + wire `web.py` to orchestrator output (see ISSUES.md).
