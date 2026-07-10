@@ -80,7 +80,7 @@ debug: false
 # can keep credentials out of the file (e.g. set REDDIT_CLIENT_ID, FB_GRAPH_TOKEN).
 sources:
   youtube_community:
-    max_posts: 5
+    max_posts: 0        # 0 = all (YouTube caps at ~200)
     download_comments: true
     max_comments_per_post: 100
     max_replies_per_comment: 200

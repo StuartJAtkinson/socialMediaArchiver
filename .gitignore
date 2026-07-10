@@ -117,3 +117,5 @@ target/
 # ─── Other tooling ───────────────────────────────────────────────────────────
 .cursorignore
 .cursorindexingignore
+
+startStop.md

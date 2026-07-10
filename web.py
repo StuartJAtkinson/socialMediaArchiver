@@ -29,34 +29,90 @@ archiver = None
 archive_thread = None
 is_archiving = False
 
-def get_accounts():
-    """Get list of archived accounts."""
-    archives_path = Path('./archives')
-    accounts = []
-    
-    if not archives_path.exists():
-        return accounts
-    
-    for platform_dir in archives_path.iterdir():
-        if not platform_dir.is_dir():
+# ── Orchestrator output/ adapter ──────────────────────────────────────────────
+# The new crawler writes output/<source>/<id>.json (normalized Item schema).
+# web.py originally only read the legacy archives/ layout; these helpers let the
+# same dashboard browse both. An account is a (source, target) pair.
+OUTPUT_DIR = Path('./output')
+
+def _iter_output_items(source):
+    """Yield each Item dict under output/<source>/, skipping comment sidecars."""
+    d = OUTPUT_DIR / source
+    if not d.is_dir():
+        return
+    for f in d.glob('*.json'):
+        if f.name.endswith('_comments.json'):
             continue
-        
-        platform = platform_dir.name
-        for account_dir in platform_dir.iterdir():
-            if not account_dir.is_dir():
-                continue
-            
-            account = account_dir.name
-            accounts.append({
-                'platform': platform,
-                'account': account,
-                'path': str(account_dir)
-            })
-    
+        try:
+            with open(f, encoding='utf-8') as fh:
+                yield json.load(fh)
+        except (OSError, json.JSONDecodeError):
+            continue  # ponytail: skip a corrupt/partial file rather than 500 the page
+
+def _item_to_post(item):
+    """Map a normalized Item to the shape templates expect."""
+    imgs = [m['url'] for m in item.get('media', [])
+            if m.get('media_type') == 'image' and m.get('url')]
+    return {
+        'post_id': item.get('id', ''),
+        'text': item.get('text', '') or item.get('title', ''),
+        'url': item.get('url', ''),
+        'created_at': item.get('timestamp', ''),
+        'image_urls': imgs,
+        'metrics': item.get('metrics') or {},
+    }
+
+def _is_output(platform):
+    return (OUTPUT_DIR / platform).is_dir()
+
+def _output_posts(platform, account):
+    return [_item_to_post(it) for it in _iter_output_items(platform)
+            if (it.get('target') or platform) == account]
+
+def get_output_accounts():
+    """List (source, target) accounts discovered under output/."""
+    accounts = []
+    if not OUTPUT_DIR.is_dir():
+        return accounts
+    counts = {}
+    for source_dir in OUTPUT_DIR.iterdir():
+        if not source_dir.is_dir() or source_dir.name == 'images':
+            continue
+        for item in _iter_output_items(source_dir.name):
+            key = (source_dir.name, item.get('target') or source_dir.name)
+            counts[key] = counts.get(key, 0) + 1
+    for (source, target), n in counts.items():
+        accounts.append({'platform': source, 'account': target,
+                         'path': str(OUTPUT_DIR / source), 'post_count': n})
     return accounts
 
+def get_accounts():
+    """Get archived accounts from both the legacy archives/ and new output/."""
+    accounts = []
+    archives_path = Path('./archives')
+    if archives_path.exists():
+        for platform_dir in archives_path.iterdir():
+            if not platform_dir.is_dir():
+                continue
+            for account_dir in platform_dir.iterdir():
+                if account_dir.is_dir():
+                    accounts.append({'platform': platform_dir.name,
+                                     'account': account_dir.name,
+                                     'path': str(account_dir)})
+    return accounts + get_output_accounts()
+
 def get_account_stats(platform, account):
-    """Get statistics for a specific account."""
+    """Get statistics for a specific account (legacy archives/ or new output/)."""
+    if _is_output(platform):
+        posts = _output_posts(platform, account)
+        dates = [p['created_at'] for p in posts if p['created_at']]
+        return {
+            'post_count': len(posts),
+            'image_count': sum(len(p['image_urls']) for p in posts),
+            'video_count': 0,
+            'latest_post': dates[0] if dates else '',
+            'earliest_post': dates[-1] if dates else '',
+        }
     try:
         archiver_instance = SocialMediaArchiver()
         stats = archiver_instance.storage.get_stats(platform, account)
@@ -66,22 +122,20 @@ def get_account_stats(platform, account):
         return {'error': str(e)}
 
 def get_posts(platform, account, limit=50, offset=0):
-    """Get posts for an account with pagination."""
+    """Get posts for an account with pagination (legacy archives/ or new output/)."""
     try:
-        archiver_instance = SocialMediaArchiver()
-        posts = archiver_instance.storage.get_posts(platform, account)
-        
+        if _is_output(platform):
+            posts = _output_posts(platform, account)
+        else:
+            posts = SocialMediaArchiver().storage.get_posts(platform, account)
+
         # Sort by created_at descending (newest first), then reverse for oldest first display
         posts.sort(key=lambda x: x.get('created_at', ''), reverse=True)
         posts.reverse()  # Oldest first for display
-        
-        # Apply pagination
-        start_idx = offset
+
         end_idx = offset + limit
-        paginated_posts = posts[start_idx:end_idx]
-        
         return {
-            'posts': paginated_posts,
+            'posts': posts[offset:end_idx],
             'total': len(posts),
             'has_more': end_idx < len(posts),
             'offset': offset,
@@ -108,7 +162,7 @@ def index():
     accounts = get_accounts()
     return render_template('index.html', accounts=accounts, is_archiving=is_archiving)
 
-@app.route('/account/<platform>/<account>')
+@app.route('/account/<platform>/<path:account>')
 def view_account(platform, account):
     """View posts for a specific account."""
     stats = get_account_stats(platform, account)
@@ -120,7 +174,7 @@ def view_account(platform, account):
                          stats=stats,
                          posts_data=posts_data)
 
-@app.route('/api/posts/<platform>/<account>')
+@app.route('/api/posts/<platform>/<path:account>')
 def api_get_posts(platform, account):
     """API endpoint to get more posts."""
     try:
