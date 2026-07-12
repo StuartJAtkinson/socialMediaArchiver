@@ -99,6 +99,14 @@ sources:
   rss:
     max_items: 50
 
+  twitter:
+    # Nitter RSS. Public instances rot constantly — if a crawl returns nothing,
+    # set a currently-live instance here (list is tried in order, first wins).
+    max_posts: 50
+    # instances:
+    #   - https://nitter.privacydev.net
+    #   - https://xcancel.com
+
   facebook:
     # Tier 1: Graph API token (only reaches Pages/Groups it is authorised for).
     graph_token: ""      # or env FB_GRAPH_TOKEN

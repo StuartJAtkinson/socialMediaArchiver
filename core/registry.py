@@ -16,6 +16,7 @@ _REGISTRY: dict[str, str] = {
     "youtube_community": "connectors.youtube_community:YouTubeCommunityConnector",
     "reddit": "connectors.reddit:RedditConnector",
     "rss": "connectors.rss:RssConnector",
+    "twitter": "connectors.twitter:TwitterConnector",
     "facebook": "connectors.facebook:FacebookConnector",
 }
 

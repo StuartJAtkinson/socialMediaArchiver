@@ -8,5 +8,8 @@
 targets:
   - { source: youtube_community, target: "@ByteByteGo" }
   - { source: rss,               target: "https://news.ycombinator.com/rss" }
-  # - { source: reddit,            target: "r/programming" }
+  - { source: reddit,            target: "r/programming" }
+  - { source: twitter,           target: "@ByteByteGo" }
+  # Facebook needs a Graph token (FB_GRAPH_TOKEN) or a saved browser session
+  # (python main.py facebook-login); the browser tiers are best-effort. See ISSUES.md.
   # - { source: facebook,          target: "https://www.facebook.com/Meta" }
