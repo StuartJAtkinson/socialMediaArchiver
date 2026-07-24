@@ -5,15 +5,12 @@ __pycache__/
 
 # ─── Project artefacts ───────────────────────────────────────────────────────
 # Local state
-config/config.json
 config/config.local.json
 config/config.local.yaml
-config/fb_state.json
 .env
 .envrc
 
-# Output (both legacy and new orchestrator paths)
-archives/
+# Normalized output
 output/
 output/.checkpoint.json
 

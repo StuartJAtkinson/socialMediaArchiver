@@ -1,8 +1,13 @@
-"""Output writers and the media downloader.
+"""Pluggable output writers and the media downloader.
 
 Records are written under ``output/<source>/<id>.json`` so sources stay tidy and
 filenames never collide. The media downloader is the original ``scraper.py``
 image downloader, generalized to any media type and reused by every connector.
+
+The default ``filesystem`` backend behaves exactly as before. The optional
+``s3`` backend keeps that local cache (so the dashboard remains browsable) and
+mirrors every record, comment sidecar, and downloaded media object to an
+S3-compatible bucket.
 """
 
 from __future__ import annotations
@@ -13,7 +18,7 @@ import re
 import ssl
 import urllib.request
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from .models import Item
 
@@ -122,3 +127,96 @@ class Storage:
             json.dump(item.comments, f, indent=2, ensure_ascii=False)
         self.logger.info("Saved %d comments for %s", len(item.comments), item.uid)
         return path
+
+
+class S3Storage(Storage):
+    """Filesystem cache mirrored to AWS S3 or an S3-compatible service."""
+
+    def __init__(
+        self,
+        output_dir: str,
+        media_dir: str,
+        logger: logging.Logger,
+        bucket: str,
+        prefix: str = "",
+        endpoint_url: str | None = None,
+        region: str | None = None,
+        client: Any = None,
+    ):
+        if not bucket:
+            raise ValueError("storage.s3.bucket is required for the s3 backend")
+        super().__init__(output_dir, media_dir, logger)
+        if client is None:
+            try:
+                import boto3
+            except ImportError as exc:
+                raise RuntimeError(
+                    "The s3 backend requires boto3. Install it with: pip install boto3"
+                ) from exc
+            client = boto3.client(
+                "s3",
+                endpoint_url=endpoint_url or None,
+                region_name=region or None,
+            )
+        self.client = client
+        self.bucket = bucket
+        self.prefix = prefix.strip("/")
+
+    def _key(self, relative: str) -> str:
+        relative = relative.replace("\\", "/").lstrip("/")
+        return f"{self.prefix}/{relative}" if self.prefix else relative
+
+    def _upload(self, path: Path, relative: str) -> None:
+        key = self._key(relative)
+        self.client.upload_file(str(path), self.bucket, key)
+        self.logger.info("Uploaded s3://%s/%s", self.bucket, key)
+
+    def download_media(self, url: str, item_uid: str, index: int = 0) -> Optional[str]:
+        local = super().download_media(url, item_uid, index)
+        if local:
+            path = Path(local)
+            self._upload(path, f"images/{path.name}")
+        return local
+
+    def write_item(self, item: Item) -> Path:
+        path = super().write_item(item)
+        self._upload(path, f"{_safe(item.source)}/{path.name}")
+        return path
+
+    def write_comments(self, item: Item) -> Optional[Path]:
+        path = super().write_comments(item)
+        if path:
+            self._upload(path, f"{_safe(item.source)}/{path.name}")
+        return path
+
+
+def create_storage(config: dict, logger: logging.Logger) -> Storage:
+    """Build the configured storage backend.
+
+    ``storage.backend`` accepts ``filesystem`` (default) or ``s3``. Legacy
+    top-level ``output_dir``/``images_dir`` settings remain supported.
+    """
+    storage_config = config.get("storage", {}) or {}
+    backend = str(storage_config.get("backend", "filesystem")).lower()
+    output_dir = storage_config.get(
+        "output_dir", config.get("output_dir", "./output")
+    )
+    media_dir = storage_config.get(
+        "images_dir", config.get("images_dir", "./output/images")
+    )
+    if backend == "filesystem":
+        return Storage(output_dir, media_dir, logger)
+    if backend == "s3":
+        s3 = storage_config.get("s3", {}) or {}
+        return S3Storage(
+            output_dir=output_dir,
+            media_dir=media_dir,
+            logger=logger,
+            bucket=s3.get("bucket", ""),
+            prefix=s3.get("prefix", ""),
+            endpoint_url=s3.get("endpoint_url"),
+            region=s3.get("region"),
+        )
+    raise ValueError(
+        f"Unknown storage backend '{backend}'. Expected: filesystem or s3"
+    )

@@ -1,6 +1,6 @@
 """Twitter/X connector — Nitter RSS.
 
-Ports the legacy ``src/scraper.py`` Nitter path onto the orchestrator. A Nitter
+Provides the Twitter/X path through Nitter RSS. A Nitter
 instance exposes a user's tweets at ``{instance}/{handle}/rss`` — which is just
 RSS — so this reuses :func:`core.feeds.parse_feed` instead of reimplementing the
 old HTML/entry parsing. One tier with a built-in instance probe: instances are

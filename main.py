@@ -5,7 +5,6 @@ Subcommands:
   crawl            Run the orchestrator over config/targets.yaml (default).
   status           Print checkpoint status and exit.
   resume           Clear the checkpoint and start fresh next run.
-  facebook-login   Open a browser to capture a Facebook login session.
 
 Replaces the old single-purpose ``scraper.py`` main. Generic plumbing now lives in
 ``core/`` and each source is a connector under ``connectors/``.
@@ -93,13 +92,6 @@ def cmd_resume(cfg: dict) -> None:
         logger.info("No checkpoint at '%s'; nothing to clear.", path)
 
 
-def cmd_facebook_login(cfg: dict) -> None:
-    from connectors.facebook import save_login_session
-
-    fb_cfg = cfg.get("sources", {}).get("facebook", {}) or {}
-    save_login_session(fb_cfg, logger)
-
-
 def cmd_crawl(cfg: dict, targets_path: str) -> None:
     targets = load_targets(targets_path)
     logger.info("Loaded %d target(s).", len(targets))
@@ -118,7 +110,7 @@ def main() -> None:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("command", nargs="?", default="crawl",
-                        choices=["crawl", "status", "resume", "facebook-login"],
+                        choices=["crawl", "status", "resume"],
                         help="What to do (default: crawl).")
     parser.add_argument("--config", default="config/config.yaml")
     parser.add_argument("--targets", default="config/targets.yaml")
@@ -150,8 +142,6 @@ def main() -> None:
         cmd_status(cfg)
     elif args.command == "resume":
         cmd_resume(cfg)
-    elif args.command == "facebook-login":
-        cmd_facebook_login(cfg)
     else:
         cmd_crawl(cfg, args.targets)
 

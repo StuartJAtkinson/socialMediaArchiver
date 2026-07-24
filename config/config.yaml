@@ -48,6 +48,19 @@ images_dir: "./output/images"
 # cache_dir: "./output/.cache"
 log_file: "./output/scraper.log"
 
+# Storage backend. "filesystem" is dependency-free. "s3" keeps the same local
+# cache for the dashboard and mirrors objects to AWS S3, MinIO, Backblaze B2,
+# Cloudflare R2, or another S3-compatible endpoint (requires boto3).
+storage:
+  backend: filesystem
+  output_dir: "./output"
+  images_dir: "./output/images"
+  s3:
+    bucket: ""
+    prefix: "social-media-archive"
+    region: ""
+    endpoint_url: ""
+
 # ─── Proxy / Tor ────────────────────────────────────────────────────────────
 # Set proxy_url to enable proxy rotation (http/socks5).
 # Examples:
@@ -90,7 +103,7 @@ sources:
     # Leave blank to fall back to public .rss feeds (no auth, fewer fields).
     client_id: ""        # or env REDDIT_CLIENT_ID
     client_secret: ""    # or env REDDIT_CLIENT_SECRET
-    user_agent: "bytebytego-grabber/0.5"
+    user_agent: "socialMediaArchiver/1.0"
     sort: "new"          # new | hot | top | rising
     max_posts: 50
     with_comments: true
@@ -108,10 +121,7 @@ sources:
     #   - https://xcancel.com
 
   facebook:
-    # Tier 1: Graph API token (only reaches Pages/Groups it is authorised for).
+    # Official Graph API only. Browser scraping is intentionally unsupported.
     graph_token: ""      # or env FB_GRAPH_TOKEN
-    # Tier 2: saved browser session (run: python main.py facebook-login).
-    storage_state: "./config/fb_state.json"
-    headless: true
+    graph_version: "25.0" # or env FB_GRAPH_VERSION
     max_posts: 50
-    scroll_rounds: 8

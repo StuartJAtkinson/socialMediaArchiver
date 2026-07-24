@@ -14,9 +14,5 @@ post-archiver-improved>=0.4.0
 # ─── Reddit official API (optional — falls back to public .rss if missing) ──
 praw>=7.7
 
-# ─── Facebook browser tiers + YouTube fallback ──────────────────────────────
-# After install run: playwright install chromium
-playwright>=1.40
-
 # ─── Tor proxy rotation (optional) ───────────────────────────────────────────
 # stem

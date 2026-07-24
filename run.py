@@ -2,7 +2,7 @@
 """
 Multi-source crawler orchestrator — Runner
 Run this to start crawling. Safe to re-run (checkpoint/resume handles interruption).
-Usage: python run.py [crawl|status|resume|facebook-login] [extra args]
+Usage: python run.py [crawl|status|resume] [extra args]
 """
 import subprocess
 import sys

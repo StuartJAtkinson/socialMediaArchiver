@@ -16,7 +16,7 @@ from core.checkpoint import Checkpoint
 from core.models import Item
 from core.ratelimit import RotationManager, sleep_with_jitter
 from core.registry import get_connector_class
-from core.storage import Storage
+from core.storage import Storage, create_storage
 
 
 def make_date_filter(date_after: str, date_before: str, logger: logging.Logger):
@@ -82,11 +82,7 @@ def run(
     yaml_config: dict,
 ) -> dict[str, int]:
     """Run the crawl over all targets. Returns a summary dict."""
-    storage = Storage(
-        output_dir=yaml_config.get("output_dir", "./output"),
-        media_dir=yaml_config.get("images_dir", "./output/images"),
-        logger=logger,
-    )
+    storage = create_storage(yaml_config, logger)
     date_filter = make_date_filter(
         yaml_config.get("date_after", ""), yaml_config.get("date_before", ""), logger
     )

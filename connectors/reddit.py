@@ -56,7 +56,7 @@ class PrawProvider(Provider):
             "client_id": os.environ.get("REDDIT_CLIENT_ID") or self.config.get("client_id", ""),
             "client_secret": os.environ.get("REDDIT_CLIENT_SECRET")
             or self.config.get("client_secret", ""),
-            "user_agent": self.config.get("user_agent", "bytebytego-grabber/0.5"),
+            "user_agent": self.config.get("user_agent", "socialMediaArchiver/1.0"),
         }
 
     def available(self) -> bool:

@@ -7,32 +7,23 @@ Provides a user-friendly interface for:
 - Monitoring progress and statistics
 """
 
-import os
 import json
-import subprocess
 import threading
 from pathlib import Path
-from datetime import datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 
-# Add src to path so we can import modules
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
-
-from main import SocialMediaArchiver
+import main as crawler_cli
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'social-media-archiver-key'
 
 # Global variables for background tasks
-archiver = None
 archive_thread = None
 is_archiving = False
 
-# ── Orchestrator output/ adapter ──────────────────────────────────────────────
-# The new crawler writes output/<source>/<id>.json (normalized Item schema).
-# web.py originally only read the legacy archives/ layout; these helpers let the
-# same dashboard browse both. An account is a (source, target) pair.
+# ── Normalized output reader ──────────────────────────────────────────────────
+# The crawler writes output/<source>/<id>.json. An account is a
+# (source, target) pair.
 OUTPUT_DIR = Path('./output')
 
 def _iter_output_items(source):
@@ -62,9 +53,6 @@ def _item_to_post(item):
         'metrics': item.get('metrics') or {},
     }
 
-def _is_output(platform):
-    return (OUTPUT_DIR / platform).is_dir()
-
 def _output_posts(platform, account):
     return [_item_to_post(it) for it in _iter_output_items(platform)
             if (it.get('target') or platform) == account]
@@ -87,47 +75,25 @@ def get_output_accounts():
     return accounts
 
 def get_accounts():
-    """Get archived accounts from both the legacy archives/ and new output/."""
-    accounts = []
-    archives_path = Path('./archives')
-    if archives_path.exists():
-        for platform_dir in archives_path.iterdir():
-            if not platform_dir.is_dir():
-                continue
-            for account_dir in platform_dir.iterdir():
-                if account_dir.is_dir():
-                    accounts.append({'platform': platform_dir.name,
-                                     'account': account_dir.name,
-                                     'path': str(account_dir)})
-    return accounts + get_output_accounts()
+    """Get accounts discovered in normalized orchestrator output."""
+    return get_output_accounts()
 
 def get_account_stats(platform, account):
-    """Get statistics for a specific account (legacy archives/ or new output/)."""
-    if _is_output(platform):
-        posts = _output_posts(platform, account)
-        dates = [p['created_at'] for p in posts if p['created_at']]
-        return {
-            'post_count': len(posts),
-            'image_count': sum(len(p['image_urls']) for p in posts),
-            'video_count': 0,
-            'latest_post': dates[0] if dates else '',
-            'earliest_post': dates[-1] if dates else '',
-        }
-    try:
-        archiver_instance = SocialMediaArchiver()
-        stats = archiver_instance.storage.get_stats(platform, account)
-        metadata = archiver_instance.storage.get_metadata(platform, account)
-        return {**stats, **metadata}
-    except Exception as e:
-        return {'error': str(e)}
+    """Get statistics for a normalized-output account."""
+    posts = _output_posts(platform, account)
+    dates = sorted(p['created_at'] for p in posts if p['created_at'])
+    return {
+        'post_count': len(posts),
+        'image_count': sum(len(p['image_urls']) for p in posts),
+        'video_count': 0,
+        'latest_post': dates[-1] if dates else '',
+        'earliest_post': dates[0] if dates else '',
+    }
 
 def get_posts(platform, account, limit=50, offset=0):
-    """Get posts for an account with pagination (legacy archives/ or new output/)."""
+    """Get normalized posts for an account with pagination."""
     try:
-        if _is_output(platform):
-            posts = _output_posts(platform, account)
-        else:
-            posts = SocialMediaArchiver().storage.get_posts(platform, account)
+        posts = _output_posts(platform, account)
 
         # Sort by created_at descending (newest first), then reverse for oldest first display
         posts.sort(key=lambda x: x.get('created_at', ''), reverse=True)
@@ -145,12 +111,17 @@ def get_posts(platform, account, limit=50, offset=0):
         return {'error': str(e), 'posts': [], 'total': 0}
 
 def run_archiver_background():
-    """Run the archiver in a background thread."""
+    """Run the normalized multi-source orchestrator in a background thread."""
     global is_archiving
     try:
         is_archiving = True
-        archiver_instance = SocialMediaArchiver()
-        archiver_instance.run_all()
+        cfg = crawler_cli.load_yaml("config/config.yaml")
+        crawler_cli.logger = crawler_cli.setup_logging(
+            verbose=cfg.get("verbose", False),
+            debug=cfg.get("debug", False),
+            log_file=cfg.get("log_file"),
+        )
+        crawler_cli.cmd_crawl(cfg, "config/targets.yaml")
     except Exception as e:
         print(f"Archiver error: {e}")
     finally:

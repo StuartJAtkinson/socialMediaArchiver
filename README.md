@@ -1,166 +1,134 @@
 # socialMediaArchiver
 
-Multi-source social-media archiver. Originally a Twitter/Nitter-only CLI
-with a Flask dashboard (Phase 1); now a **multi-source crawler
-orchestrator** covering YouTube Community, Reddit, RSS/Atom, and
-Facebook behind a normalised `Item` model, with the original Twitter
-path preserved as one of the source connectors and the web dashboard
-still serving the local archive.
+A local-first, multi-source archive for public social content. Connectors normalize
+every record into one `Item` schema, the orchestrator handles checkpointing,
+media, comments and storage, and the Flask dashboard browses the resulting
+archive.
 
-**Status:** core local archiving ✅ · multi-source orchestrator ✅ ·
-Flask web dashboard ✅ · cloud storage 🔄 (roadmap). See
-[`STATUS.md`](STATUS.md) for the legacy phase checklist and
-[`ISSUES.md`](ISSUES.md) for the running open/resolved list.
+## Sources
 
-## Architecture
+| Source | Provider |
+|---|---|
+| YouTube Community | `post-archiver-improved` |
+| Twitter/X | Nitter RSS with instance fallback |
+| Reddit | PRAW, falling back to public RSS |
+| RSS/Atom | `feedparser` |
+| Facebook Pages | Official Graph API; `FB_GRAPH_TOKEN` required |
 
-```
-socialMediaArchiver/
-├── core/                       source-agnostic plumbing (new)
-│   ├── models.py               Item / ItemAuthor / MediaItem — every record has uid = source:id
-│   ├── checkpoint.py           resume state, legacy-YouTube migration
-│   ├── ratelimit.py            inter-request jitter, Tor/proxy rotation
-│   ├── storage.py              filesystem writer + media downloader
-│   ├── feeds.py                shared RSS/Atom parsing
-│   ├── registry.py             source name → connector class
-│   ├── orchestrator.py         generic crawl loop
-│   └── errors.py               RateLimitError, AuthError, ProviderUnavailable
-├── connectors/                 one module per source
-│   ├── base.py                 Connector + tiered-fallback Provider
-│   ├── youtube_community.py    wraps post-archiver-improved
-│   ├── reddit.py               praw → public .rss fallback
-│   ├── rss.py                  generic RSS/Atom (feedparser)
-│   └── facebook.py             Graph API → auth browser → public browser
-├── src/                        legacy Phase 1 code (Twitter-via-Nitter, JSONL storage)
-│   ├── main.py
-│   ├── scraper.py              TwitterScraper (Nitter RSS)
-│   ├── storage.py              StorageManager (JSONL + filesystem)
-│   └── batch_processor.py      smart date-based batch planning
-├── web.py                      Flask dashboard (Phase 5, brought forward)
-├── archiver.py                 legacy CLI entry point
-├── main.py                     new orchestrator CLI: crawl / status / resume / facebook-login
-├── run.py / run.bat / run.sh   thin wrappers
-├── setup.py / setup.bat        venv + dep + Playwright installer
-├── config/
-│   ├── config.yaml             orchestrator config (per-source blocks)
-│   ├── targets.yaml            {source, target} pairs to crawl
-│   ├── channels.txt            legacy YouTube channels (kept for history)
-│   └── config.example.json     legacy Twitter config
-├── templates/                  Flask templates
-├── output/, archives/          crawler / legacy output (gitignored)
-└── ISSUES.md                   open/resolved issues
-```
+Facebook browser scraping is intentionally unsupported: the DOM is unstable,
+saved sessions are sensitive credentials, and automated scraping can violate
+platform terms.
 
-### Add a new source
+## Quick start
 
-Write `connectors/<name>.py` exposing a `Connector` + `Provider`(s) that
-yield `Item`s, then register `"<name>": "module:Class"` in
-`core/registry.py`. No core changes needed.
-
-## Setup
-
-### Windows (recommended)
-
-```bat
-python setup.py
-run.bat
-```
-
-`setup.py` creates `.venv`, installs `requirements.txt`, and runs
-`playwright install chromium`. `run.bat` invokes the new orchestrator.
-
-### Linux / WSL
-
-```bash
-python setup.py
-./run.sh
-```
-
-### Manual
-
-```bash
+```powershell
 python -m venv .venv
-. .venv/Scripts/activate    # Windows
-# . .venv/bin/activate      # Linux/macOS
-pip install -r requirements.txt
-playwright install chromium
-python main.py crawl
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python main.py crawl --verbose
+python web.py
 ```
+
+Open <http://localhost:5000/>.
+
+On Linux/macOS, activate with `. .venv/bin/activate`. `python setup.py`,
+`setup.bat`, `run.bat`, `run.sh`, and `python run.py` are convenience wrappers.
 
 ## CLI
 
-```
-python main.py crawl                  # run the multi-source orchestrator
-python main.py status                 # print checkpoint state
-python main.py resume                 # clear the checkpoint, start fresh next run
-python main.py facebook-login         # open a browser, save FB session
-python main.py crawl --verbose        # more logs
-python main.py crawl --proxy-url ...  # override config at runtime
+```text
+python main.py crawl   [--config FILE] [--targets FILE] [--verbose]
+python main.py status  [--config FILE]
+python main.py resume  [--config FILE]
 ```
 
-Legacy CLI (Phase 1, still works):
-
-```bash
-python archiver.py                    # Nitter/Twitter archiver
-python web.py                         # Flask dashboard on :5000
-```
+`resume` clears the checkpoint so the next crawl starts from the beginning.
+The dashboard’s **Start Archiving** button invokes the same orchestrator.
 
 ## Configuration
 
-`config/config.yaml` holds the new orchestrator's global knobs:
+- `config/config.yaml`: global and per-source settings
+- `config/targets.yaml`: `{source, target}` crawl list
+- Environment variables: secrets such as `FB_GRAPH_TOKEN`,
+  `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, and standard AWS credentials
 
-- `post_delay`, `channel_delay`, `date_after`, `date_before`
-- `proxy_url`, `proxy_rotation_every`
-- `tor_control_port`, `tor_password`
-- `download_images`, `download_comments`
-- `sources.<name>.*` — per-connector options
+Output defaults to:
 
-Per-source secrets: env vars first, then the YAML, so credentials can
-stay out of the file (`REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`,
-`FB_GRAPH_TOKEN`).
+```text
+output/
+├── .checkpoint.json
+├── images/
+└── <source>/
+    ├── <id>.json
+    └── <id>_comments.json
+```
 
-`config/targets.yaml` lists `{source, target}` pairs:
+### S3-compatible storage
 
-| source               | target                                             |
-| -------------------- | -------------------------------------------------- |
-| `youtube_community`  | `@handle`, channel id, or channel URL              |
-| `reddit`             | `r/<subreddit>` or `u/<user>`                      |
-| `rss`                | any RSS/Atom feed URL                              |
-| `facebook`           | page slug or URL                                   |
+The default `filesystem` backend is dependency-free. To mirror the local cache
+to AWS S3, MinIO, Backblaze B2, Cloudflare R2, or another S3-compatible service:
 
-The legacy `config/config.example.json` is still used by
-`python archiver.py` and `python web.py`.
+```powershell
+python -m pip install boto3
+```
 
-## Notes
+Then set:
 
-- The Facebook browser tiers scrape an obfuscated, frequently-changing
-  DOM and degrade gracefully — Graph API is the only stable path. See
-  `ISSUES.md`.
-- Reddit's `praw` provider needs credentials or the connector falls
-  back to public `.rss` feeds (no scores / comment trees); the fallback
-  logs at WARNING so it is visible at the default log level.
-- `post-archiver-improved` is required for the YouTube connector.
-- Nitter (used by the legacy `src/scraper.py`) is increasingly
-  unreliable. The new `connectors/rss.py` covers the same use case for
-  any public RSS/Atom feed; a `connectors/twitter.py` port of the
-  Nitter logic is tracked in `ISSUES.md`.
+```yaml
+storage:
+  backend: s3
+  output_dir: "./output"
+  images_dir: "./output/images"
+  s3:
+    bucket: "my-archive"
+    prefix: "social-media"
+    region: "eu-west-2"
+    endpoint_url: ""  # set for non-AWS services
+```
 
-## Roadmap
+Authentication uses boto3’s standard credential chain. Files remain local for
+the dashboard and are uploaded after each successful write.
 
-The `STATUS.md` checklist covers the legacy Phase 1–5 plan. The
-forward-looking items live in the new `Roadmap` section in
-`ISSUES.md`-adjacent notes (or below once we move it there):
+## Architecture
 
-1. Port `src/scraper.py`'s Nitter Twitter path into
-   `connectors/twitter.py` so it sits behind the same registry.
-2. Wire the Flask `web.py` dashboard into the new orchestrator's
-   output so the multi-source archive is browsable alongside the
-   legacy Twitter one.
-3. Stabilise the Facebook browser tiers (see open issue).
-4. Add a 5th source connector (Mastodon, Bluesky, HackerNews).
-5. Connector-level tests + CI.
+```text
+config/targets.yaml
+        │
+        ▼
+main.py → core/orchestrator.py → connectors/<source>.py
+                  │
+                  ├─ checkpoint / rate limiting
+                  ├─ normalized Item model
+                  └─ filesystem or S3-mirrored storage
+                                      │
+                                      ▼
+                                  output/
+                                      │
+                                      ▼
+                                  web.py
+```
+
+Connectors expose ordered providers through `connectors/base.py`. Expected
+availability, authentication and rate-limit failures fall through cleanly;
+normalized `Item.uid` values prevent duplicates.
+
+## Development
+
+```powershell
+python -m pytest tests -q
+python -m connectors.twitter
+python main.py --help
+```
+
+Add a connector by implementing `Connector.build_providers()`, mapping native
+records to `core.models.Item`, and registering it in `core/registry.py`.
+
+See [QUICKSTART.md](QUICKSTART.md), [ARCHITECTURE.md](ARCHITECTURE.md),
+[DEVELOPMENT.md](DEVELOPMENT.md), [STATUS.md](STATUS.md), and
+[ROADMAP.md](ROADMAP.md).
 
 ## Disclaimer
 
-For personal archiving and backup. Respect platform ToS, user privacy,
-copyright, local law, and rate limits. Use at your own risk.
+Archive only content you are permitted to access and retain. Respect platform
+terms, robots policies, privacy rights, copyright, and rate limits. Public
+endpoints and unofficial providers can disappear without notice.

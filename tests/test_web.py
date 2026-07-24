@@ -1,0 +1,65 @@
+import json
+
+import web
+
+
+def _write_item(root, source, item_id, target="@example", timestamp="2026-01-01"):
+    directory = root / source
+    directory.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "id": item_id,
+        "source": source,
+        "target": target,
+        "url": f"https://example.test/{item_id}",
+        "timestamp": timestamp,
+        "text": f"post {item_id}",
+        "media": [{"url": "https://example.test/image.png", "media_type": "image"}],
+        "metrics": {"likes": 2},
+    }
+    (directory / f"{item_id}.json").write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_dashboard_reads_only_normalized_output(tmp_path, monkeypatch):
+    monkeypatch.setattr(web, "OUTPUT_DIR", tmp_path)
+    _write_item(tmp_path, "twitter", "one")
+    _write_item(tmp_path, "twitter", "two", timestamp="2026-02-01")
+
+    accounts = web.get_accounts()
+    stats = web.get_account_stats("twitter", "@example")
+    posts = web.get_posts("twitter", "@example")
+
+    assert accounts == [{
+        "platform": "twitter",
+        "account": "@example",
+        "path": str(tmp_path / "twitter"),
+        "post_count": 2,
+    }]
+    assert stats["post_count"] == 2
+    assert stats["image_count"] == 2
+    assert stats["earliest_post"] == "2026-01-01"
+    assert stats["latest_post"] == "2026-02-01"
+    assert posts["total"] == 2
+
+
+def test_background_archive_runs_orchestrator(monkeypatch):
+    calls = []
+    monkeypatch.setattr(web.crawler_cli, "load_yaml", lambda path: {"verbose": False})
+    monkeypatch.setattr(web.crawler_cli, "setup_logging", lambda **kwargs: object())
+    monkeypatch.setattr(
+        web.crawler_cli,
+        "cmd_crawl",
+        lambda config, targets: calls.append((config, targets)),
+    )
+
+    web.run_archiver_background()
+
+    assert calls == [({"verbose": False}, "config/targets.yaml")]
+    assert web.is_archiving is False
+
+
+def test_dashboard_routes_render():
+    client = web.app.test_client()
+
+    assert client.get("/").status_code == 200
+    assert client.get("/api/stats").status_code == 200
+

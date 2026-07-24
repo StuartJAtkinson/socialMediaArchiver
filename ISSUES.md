@@ -1,19 +1,27 @@
-# Issues — socialMediaArchiver
-
-> Project naming: the local working dir was historically `bytebytego-grabber`.
-> The GitHub remote is `socialMediaArchiver`. After the combine the canonical
-> name is `socialMediaArchiver`; the orchestrator code added in the merge is
-> the new spine, with the legacy `src/` Phase 1 code preserved alongside.
+# Issues
 
 ## Open
-- [ ] **Facebook browser tiers are brittle** — `auth-browser`/`public-browser` scrape an obfuscated, frequently-changing DOM (`div[role='article']`). Extraction is best-effort and may yield little or break when FB changes markup. Graph API tier is the only stable path. *(found 2026-06-06)*
+
+No known open project issues.
 
 ## Resolved
-- [x] **Port the Nitter Twitter path to a `connectors/twitter.py`** — added `connectors/twitter.py` and registered `"twitter"` in `core/registry.py`. Nitter serves `{instance}/{handle}/rss` (plain RSS), so the connector reuses `core.feeds.parse_feed` rather than reimplementing `src/scraper.py`'s parser. Now inherits the orchestrator's checkpoint/proxy/storage like every other source, and shows up in the dashboard via the `output/` adapter. Verified live: pulled 20 @ByteByteGo tweets. *(resolved 2026-07-12)*
-- [x] **Nitter reliability** — `connectors/twitter.py` ships a small default instance list and a probe: instances are tried in order, the first that returns entries wins, and if all are dead it raises `ProviderUnavailable` so the crawl continues instead of hanging. The list is overridable via `config.yaml` `sources.twitter.instances` when defaults rot. *(resolved 2026-07-12)*
-- [x] **Wire `web.py` to the new orchestrator's output** — added a small adapter in `web.py` that reads `output/<source>/<id>.json` (normalized `Item` schema) alongside the legacy `archives/` layout. `get_accounts()` now lists `(source, target)` pairs from `output/`, and `get_account_stats`/`get_posts` branch on whether the platform is an `output/` source dir. `_item_to_post()` maps Item → the template's post shape; account routes use the `<path:account>` converter so RSS feed-URL targets route cleanly. Verified live: dashboard lists ByteByteGo (200 posts) + Hacker News RSS (60). No dashboard rewrite. *(resolved 2026-07-07)*
-- [x] **Combine bytebytego-grabber into socialMediaArchiver** — `git fetch` + `git merge --allow-unrelated-histories` brought the multi-source orchestrator (core/, connectors/, main.py, config, setup, run scripts) into the socialMediaArchiver working tree. Resolved 3 file conflicts: `.gitignore` (union), `requirements.txt` (union, organised by role), `README.md` (rewritten as a single overview that documents both the legacy Phase 1 stack and the new orchestrator). Both commit histories preserved. *(resolved 2026-06-14)*
-- [x] **Reddit praw fallback was silent** — without `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET` (or praw installed) the connector fell back to public `.rss` feeds with only `logger.info` messages, invisible at the default WARNING console level. Both paths in `PrawProvider.available()` now log at WARNING, naming what's lost (scores, comment trees) and the exact fix (install praw / set the env vars). Getting full data still requires the user to create a free Reddit script app and set the credentials. *(resolved 2026-06-12)*
-- [x] **Monolith refactor to plugin architecture** — split `scraper.py` into `core/` (models, checkpoint, ratelimit, storage, feeds, registry, orchestrator) + `connectors/` (base, youtube_community, reddit, rss, facebook) behind a normalized `Item` schema with tiered fallback providers. *(resolved 2026-06-06)*
-- [x] **Legacy scraper.py retired but not deleted** — deleted `scraper.py` plus the debug/hang-repro scripts (`debug_hang.py`, `test_exit*.py`, `test_scraper.py`, `test_standalone.py`, `test_yaml_hang.py`). Updated `run.bat`, `run.sh`, `setup.py`, `setup.bat`, and `README.md` to point at the new `main.py` entry point. Removed the ScrapingBee config block (only consumed by the retired script). *(resolved 2026-06-07)*
 
+- [x] **Facebook browser tiers were brittle** — removed authenticated and public
+  DOM scraping entirely. Facebook now uses only the official Graph API and
+  requires `FB_GRAPH_TOKEN`; unavailable credentials skip the provider without
+  blocking other targets. This removes unstable selectors, saved session
+  cookies, and misleading best-effort behavior. *(resolved 2026-07-24)*
+- [x] **Two runtime generations** — removed the legacy `src/` implementation,
+  JSON configuration, channel list, and `archiver.py`; the dashboard now starts
+  `core.orchestrator` through `main.py`. *(resolved 2026-07-24)*
+- [x] **Storage was filesystem-only** — added a storage factory and optional
+  S3-compatible mirror while preserving the local dashboard cache. *(resolved
+  2026-07-24)*
+- [x] **Dashboard did not browse orchestrator output** — normalized output
+  adapter added. *(resolved 2026-07-07)*
+- [x] **Twitter path lived outside the connector architecture** — added the
+  Nitter RSS connector with instance fallback. *(resolved 2026-07-12)*
+- [x] **Reddit fallback was silent** — fallback warnings now explain reduced
+  metadata and credential setup. *(resolved 2026-06-12)*
+- [x] **Monolith lacked provider isolation** — split source logic into
+  `connectors/` and generic plumbing into `core/`. *(resolved 2026-06-06)*

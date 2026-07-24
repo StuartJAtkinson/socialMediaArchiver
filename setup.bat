@@ -1,5 +1,5 @@
 @echo off
-REM Set up the Python virtual environment and install dependencies for bytebytego-grabber.
+REM Set up the Python virtual environment for socialMediaArchiver.
 
 REM --- Configuration ---
 SET VENV_DIR=.venv
@@ -35,16 +35,6 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 echo Dependencies installed successfully.
-
-REM --- Install Playwright Browsers (Facebook browser tiers need this) ---
-echo Installing Playwright Chromium browser...
-playwright install chromium
-if %errorlevel% neq 0 (
-    echo WARNING: Playwright browser installation may have encountered issues.
-    echo Try again after activating the venv: .\%VENV_DIR%\Scripts\activate ^&^& playwright install chromium
-) else (
-    echo Playwright browsers installed successfully.
-)
 
 echo --- Setup complete! ---
 echo You can now run the crawler: run.bat

@@ -1,7 +1,7 @@
 @echo off
 REM Run the multi-source crawler orchestrator on Windows.
-REM Entry point is main.py (subcommands: crawl, status, resume, facebook-login).
-REM Usage: run.bat [crawl|status|resume|facebook-login] [main.py options]
+REM Entry point is main.py (subcommands: crawl, status, resume).
+REM Usage: run.bat [crawl|status|resume] [main.py options]
 REM Examples:
 REM   run.bat
 REM   run.bat status
