@@ -25,7 +25,7 @@
 
 ## Next
 
-- [ ] Scheduled crawls with persisted run history
+- [x] Scheduled crawls with persisted run history
 - [ ] Full-text search across normalized archives
 - [ ] Mastodon connector
 - [ ] Bluesky connector
