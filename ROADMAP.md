@@ -20,7 +20,7 @@
 - [x] Pluggable storage factory
 - [x] Filesystem backend
 - [x] S3-compatible mirror (AWS S3, MinIO, B2, R2)
-- [ ] Native Google Cloud Storage backend
+- [x] Native Google Cloud Storage backend
 - [ ] Native Azure Blob backend
 
 ## Next
