@@ -72,9 +72,13 @@ adapts `Item` fields to the post-card view, and exposes:
 - `/api/posts/<source>/<target>`
 - `/api/archive/start`
 - `/api/archive/status`
+- `/api/archive/history`
 
 The archive route invokes the orchestrator directly; it does not use a separate
-legacy implementation.
+legacy implementation. When configured, the dashboard process also starts a
+periodic crawl scheduler. Each run is recorded locally in
+`output/.run_history.json`; item-level checkpointing remains intact between
+runs while target completion resets for each new crawl.
 
 ## Security boundaries
 

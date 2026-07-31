@@ -93,6 +93,11 @@ tor_password: ""
 enable_checkpoint: true
 checkpoint_file: "./output/.checkpoint.json"
 
+# Optional periodic crawls while the Flask dashboard is running. Set to a
+# positive number of minutes to enable; 0 disables scheduling.
+schedule:
+  interval_minutes: 0
+
 # ─── Logging ─────────────────────────────────────────────────────────────────
 verbose: true
 debug: false

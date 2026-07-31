@@ -48,13 +48,20 @@ def test_background_archive_runs_orchestrator(monkeypatch):
     monkeypatch.setattr(
         web.crawler_cli,
         "cmd_crawl",
-        lambda config, targets: calls.append((config, targets)),
+        lambda config, targets, trigger="manual": calls.append((config, targets, trigger)),
     )
 
     web.run_archiver_background()
 
-    assert calls == [({"verbose": False}, "config/targets.yaml")]
+    assert calls == [({"verbose": False}, "config/targets.yaml", "manual")]
     assert web.is_archiving is False
+
+
+def test_schedule_interval_only_accepts_positive_minutes():
+    assert web._schedule_seconds({"schedule": {"interval_minutes": 5}}) == 300
+    assert web._schedule_seconds({"schedule": {"interval_minutes": 0}}) == 0
+    assert web._schedule_seconds({"schedule": {"interval_minutes": "nope"}}) == 0
+    assert web._schedule_seconds({"schedule": {"interval_minutes": "inf"}}) == 0
 
 
 def test_dashboard_routes_render():
@@ -62,4 +69,3 @@ def test_dashboard_routes_render():
 
     assert client.get("/").status_code == 200
     assert client.get("/api/stats").status_code == 200
-

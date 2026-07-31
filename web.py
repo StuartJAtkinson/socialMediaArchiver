@@ -8,11 +8,13 @@ Provides a user-friendly interface for:
 """
 
 import json
+import math
 import threading
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 
 import main as crawler_cli
+from core.run_history import RunHistory, run_history_path
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'social-media-archiver-key'
@@ -20,6 +22,10 @@ app.config['SECRET_KEY'] = 'social-media-archiver-key'
 # Global variables for background tasks
 archive_thread = None
 is_archiving = False
+archive_lock = threading.Lock()
+scheduler_thread = None
+scheduler_stop = threading.Event()
+schedule_interval_minutes = 0.0
 
 # ── Normalized output reader ──────────────────────────────────────────────────
 # The crawler writes output/<source>/<id>.json. An account is a
@@ -110,22 +116,67 @@ def get_posts(platform, account, limit=50, offset=0):
     except Exception as e:
         return {'error': str(e), 'posts': [], 'total': 0}
 
-def run_archiver_background():
+def run_archiver_background(trigger="manual"):
     """Run the normalized multi-source orchestrator in a background thread."""
     global is_archiving
     try:
-        is_archiving = True
         cfg = crawler_cli.load_yaml("config/config.yaml")
         crawler_cli.logger = crawler_cli.setup_logging(
             verbose=cfg.get("verbose", False),
             debug=cfg.get("debug", False),
             log_file=cfg.get("log_file"),
         )
-        crawler_cli.cmd_crawl(cfg, "config/targets.yaml")
+        crawler_cli.cmd_crawl(cfg, "config/targets.yaml", trigger=trigger)
     except Exception as e:
         print(f"Archiver error: {e}")
     finally:
-        is_archiving = False
+        with archive_lock:
+            is_archiving = False
+
+
+def start_archive(trigger="manual"):
+    """Start one crawl if another one is not already running."""
+    global archive_thread, is_archiving
+    with archive_lock:
+        if is_archiving:
+            return False
+        is_archiving = True
+        archive_thread = threading.Thread(
+            target=run_archiver_background, args=(trigger,), daemon=True
+        )
+        archive_thread.start()
+    return True
+
+
+def _schedule_seconds(config):
+    """Convert the optional schedule interval to seconds; zero disables it."""
+    try:
+        minutes = float((config.get("schedule") or {}).get("interval_minutes", 0))
+    except (TypeError, ValueError):
+        return 0.0
+    return minutes * 60 if math.isfinite(minutes) and minutes > 0 else 0.0
+
+
+def _scheduler_loop(interval_seconds):
+    while not scheduler_stop.wait(interval_seconds):
+        start_archive("scheduled")
+
+
+def start_scheduler():
+    """Enable configured periodic crawls for this dashboard process."""
+    global scheduler_thread, schedule_interval_minutes
+    cfg = crawler_cli.load_yaml("config/config.yaml")
+    interval_seconds = _schedule_seconds(cfg)
+    schedule_interval_minutes = interval_seconds / 60
+    if not interval_seconds:
+        return
+    if scheduler_thread and scheduler_thread.is_alive():
+        return
+    scheduler_stop.clear()
+    scheduler_thread = threading.Thread(
+        target=_scheduler_loop, args=(interval_seconds,), daemon=True
+    )
+    scheduler_thread.start()
 
 @app.route('/')
 def index():
@@ -160,16 +211,8 @@ def api_get_posts(platform, account):
 @app.route('/api/archive/start', methods=['POST'])
 def api_start_archive():
     """Start archiving in background."""
-    global archive_thread, is_archiving
-    
-    if is_archiving:
+    if not start_archive():
         return jsonify({'status': 'already_running'})
-    
-    # Start archiving in background thread
-    archive_thread = threading.Thread(target=run_archiver_background)
-    archive_thread.daemon = True
-    archive_thread.start()
-    
     return jsonify({'status': 'started'})
 
 @app.route('/api/archive/status')
@@ -177,8 +220,16 @@ def api_archive_status():
     """Get archiving status."""
     return jsonify({
         'is_archiving': is_archiving,
+        'schedule_interval_minutes': schedule_interval_minutes,
         'accounts': get_accounts()
     })
+
+@app.route('/api/archive/history')
+def api_archive_history():
+    """Return persisted crawl outcomes, newest first."""
+    cfg = crawler_cli.load_yaml("config/config.yaml", required=False)
+    history = RunHistory(run_history_path(cfg), crawler_cli.logger)
+    return jsonify({'runs': history.recent()})
 
 @app.route('/api/stats')
 def api_stats():
@@ -206,4 +257,5 @@ def api_stats():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    start_scheduler()
+    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)

@@ -94,6 +94,12 @@ class Checkpoint:
     def is_target_done(self, target_key: str) -> bool:
         return target_key in self.data.get("targets_done", [])
 
+    def begin_run(self) -> None:
+        """Prepare a new crawl while retaining item-level deduplication state."""
+        self.data["targets_done"] = []
+        self.data["last_item"] = None
+        self.data["start_time"] = datetime.now(timezone.utc).isoformat()
+
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         try:

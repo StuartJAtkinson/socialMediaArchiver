@@ -57,11 +57,28 @@ Output defaults to:
 ```text
 output/
 ├── .checkpoint.json
+├── .run_history.json
 ├── images/
 └── <source>/
     ├── <id>.json
     └── <id>_comments.json
 ```
+
+### Scheduled crawls and run history
+
+To run configured targets periodically while the dashboard is running, set an
+interval in `config/config.yaml` and launch `python web.py`:
+
+```yaml
+schedule:
+  interval_minutes: 60
+```
+
+`0` (the default) disables scheduled crawls. Each run is appended to
+`output/.run_history.json` with its trigger, timestamps, outcome, and crawl
+totals; the newest entries are available at `/api/archive/history`. Every new
+run revisits the configured targets but keeps item-level checkpointing, so
+already archived records are not downloaded again.
 
 ### S3-compatible storage
 

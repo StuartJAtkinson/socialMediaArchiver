@@ -16,7 +16,6 @@ import argparse
 import json
 import logging
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -24,6 +23,7 @@ import yaml
 
 from core.checkpoint import Checkpoint
 from core import orchestrator
+from core.run_history import RunHistory, run_history_path
 
 logger = logging.getLogger("bytebytego")
 
@@ -92,16 +92,22 @@ def cmd_resume(cfg: dict) -> None:
         logger.info("No checkpoint at '%s'; nothing to clear.", path)
 
 
-def cmd_crawl(cfg: dict, targets_path: str) -> None:
+def cmd_crawl(cfg: dict, targets_path: str, trigger: str = "manual") -> dict[str, int]:
     targets = load_targets(targets_path)
     logger.info("Loaded %d target(s).", len(targets))
 
     cp = Checkpoint(_checkpoint_path(cfg), logger)
-    if not cp.data.get("start_time"):
-        cp.data["start_time"] = datetime.now(timezone.utc).isoformat()
-        logger.info("Starting new crawl session.")
-
-    orchestrator.run(targets, logger, cp, cfg)
+    cp.begin_run()
+    logger.info("Starting new crawl session.")
+    history = RunHistory(run_history_path(cfg), logger)
+    run_id = history.start(trigger)
+    try:
+        totals = orchestrator.run(targets, logger, cp, cfg)
+    except Exception as exc:
+        history.finish(run_id, error=str(exc))
+        raise
+    history.finish(run_id, totals=totals)
+    return totals
 
 
 def main() -> None:
