@@ -21,7 +21,7 @@
 - [x] Filesystem backend
 - [x] S3-compatible mirror (AWS S3, MinIO, B2, R2)
 - [x] Native Google Cloud Storage backend
-- [ ] Native Azure Blob backend
+- [x] Native Azure Blob backend
 
 ## Next
 
