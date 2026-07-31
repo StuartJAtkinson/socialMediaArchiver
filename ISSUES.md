@@ -29,3 +29,11 @@
   metadata and credential setup. *(resolved 2026-06-12)*
 - [x] **Monolith lacked provider isolation** — split source logic into
   `connectors/` and generic plumbing into `core/`. *(resolved 2026-06-06)*
+
+## Needs input (Auto Continue)
+*Left by Auto Continue 2026-07-31 — decide these, then clear CONSIDERATIONS.md.*
+- Secondary nav link styling disagrees between templates: `templates/account.html:319-323` and `templates/index.html:311-21`, giving "← Back to Dashboard" a neutral/transparent style while "View Posts" has an indigo/primary treatment. Needs a human call on the correct secondary-link style.
+
+Two different "key stats" layouts for the same content (post/image/video counts): `templates/account.html:353-359` `.stats-bar` is a borderless flex row, while `templates/index.html:261-268` `.stats-grid` is a bordered grid with hairline dividers. Pick one presentation.
+
+Decorative emoji used in headings on `templates/index.html` (📚/🚀/📁) but not on `templates/account.html`. Decide whether emoji headings are part of the visual language or should be dropped.
