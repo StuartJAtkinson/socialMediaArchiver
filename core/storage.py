@@ -8,7 +8,8 @@ The default ``filesystem`` backend behaves exactly as before. The optional
 ``s3`` backend keeps that local cache (so the dashboard remains browsable) and
 mirrors every record, comment sidecar, and downloaded media object to an
 S3-compatible bucket. The ``gcs`` backend provides the same local-first
-mirroring behavior for Google Cloud Storage.
+mirroring behavior for Google Cloud Storage. The ``azure`` backend does the
+same for Azure Blob Storage.
 """
 
 from __future__ import annotations
@@ -249,11 +250,75 @@ class GCSStorage(Storage):
         return path
 
 
+class AzureBlobStorage(Storage):
+    """Filesystem cache mirrored to a native Azure Blob Storage container."""
+
+    def __init__(
+        self,
+        output_dir: str,
+        media_dir: str,
+        logger: logging.Logger,
+        container: str,
+        prefix: str = "",
+        connection_string: str | None = None,
+        client: Any = None,
+    ):
+        if not container:
+            raise ValueError("storage.azure.container is required for the azure backend")
+        super().__init__(output_dir, media_dir, logger)
+        if client is None:
+            if not connection_string:
+                raise ValueError(
+                    "storage.azure.connection_string is required for the azure backend"
+                )
+            try:
+                from azure.storage.blob import BlobServiceClient
+            except ImportError as exc:
+                raise RuntimeError(
+                    "The azure backend requires azure-storage-blob. Install it with: "
+                    "pip install azure-storage-blob"
+                ) from exc
+            client = BlobServiceClient.from_connection_string(connection_string)
+        self.client = client
+        self.container = container
+        self.prefix = prefix.strip("/")
+        self._container = client.get_container_client(container)
+
+    def _key(self, relative: str) -> str:
+        relative = relative.replace("\\", "/").lstrip("/")
+        return f"{self.prefix}/{relative}" if self.prefix else relative
+
+    def _upload(self, path: Path, relative: str) -> None:
+        key = self._key(relative)
+        with path.open("rb") as data:
+            self._container.get_blob_client(key).upload_blob(data, overwrite=True)
+        self.logger.info("Uploaded azure://%s/%s", self.container, key)
+
+    def download_media(self, url: str, item_uid: str, index: int = 0) -> Optional[str]:
+        local = super().download_media(url, item_uid, index)
+        if local:
+            path = Path(local)
+            self._upload(path, f"images/{path.name}")
+        return local
+
+    def write_item(self, item: Item) -> Path:
+        path = super().write_item(item)
+        self._upload(path, f"{_safe(item.source)}/{path.name}")
+        return path
+
+    def write_comments(self, item: Item) -> Optional[Path]:
+        path = super().write_comments(item)
+        if path:
+            self._upload(path, f"{_safe(item.source)}/{path.name}")
+        return path
+
+
 def create_storage(config: dict, logger: logging.Logger) -> Storage:
     """Build the configured storage backend.
 
-    ``storage.backend`` accepts ``filesystem`` (default), ``s3``, or ``gcs``.
-    Legacy top-level ``output_dir``/``images_dir`` settings remain supported.
+    ``storage.backend`` accepts ``filesystem`` (default), ``s3``, ``gcs``, or
+    ``azure``. Legacy top-level ``output_dir``/``images_dir`` settings remain
+    supported.
     """
     storage_config = config.get("storage", {}) or {}
     backend = str(storage_config.get("backend", "filesystem")).lower()
@@ -286,6 +351,16 @@ def create_storage(config: dict, logger: logging.Logger) -> Storage:
             prefix=gcs.get("prefix", ""),
             project=gcs.get("project"),
         )
+    if backend == "azure":
+        azure = storage_config.get("azure", {}) or {}
+        return AzureBlobStorage(
+            output_dir=output_dir,
+            media_dir=media_dir,
+            logger=logger,
+            container=azure.get("container", ""),
+            prefix=azure.get("prefix", ""),
+            connection_string=azure.get("connection_string"),
+        )
     raise ValueError(
-        f"Unknown storage backend '{backend}'. Expected: filesystem, s3, or gcs"
+        f"Unknown storage backend '{backend}'. Expected: filesystem, s3, gcs, or azure"
     )

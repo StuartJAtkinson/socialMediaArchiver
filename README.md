@@ -115,6 +115,31 @@ including `GOOGLE_APPLICATION_CREDENTIALS`, user ADC, and attached service
 accounts. Files remain local for the dashboard and are uploaded after each
 successful write.
 
+### Azure Blob Storage
+
+To mirror the local cache to an Azure Blob Storage container:
+
+```powershell
+python -m pip install azure-storage-blob
+```
+
+Then set:
+
+```yaml
+storage:
+  backend: azure
+  output_dir: "./output"
+  images_dir: "./output/images"
+  azure:
+    container: "social-media"
+    prefix: "social-media"
+    connection_string: "DefaultEndpointsProtocol=https;AccountName=..."
+```
+
+Use a connection string from the Azure portal or an environment-specific,
+ignored config file; do not commit it. Files remain local for the dashboard and
+are uploaded after each successful write.
+
 ## Architecture
 
 ```text
@@ -125,7 +150,7 @@ main.py → core/orchestrator.py → connectors/<source>.py
                   │
                   ├─ checkpoint / rate limiting
                   ├─ normalized Item model
-                  └─ filesystem, S3, or GCS-mirrored storage
+                  └─ filesystem, S3, GCS, or Azure Blob-mirrored storage
                                       │
                                       ▼
                                   output/

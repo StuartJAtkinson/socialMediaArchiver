@@ -4,7 +4,7 @@ import logging
 import pytest
 
 from core.models import Item
-from core.storage import GCSStorage, S3Storage, Storage, create_storage
+from core.storage import AzureBlobStorage, GCSStorage, S3Storage, Storage, create_storage
 
 
 class FakeS3:
@@ -41,6 +41,33 @@ class FakeGCS:
     def bucket(self, name):
         self.buckets.append(name)
         return FakeGCSBucket(name, self.uploads)
+
+
+class FakeAzureBlob:
+    def __init__(self, uploads, name):
+        self.uploads = uploads
+        self.name = name
+
+    def upload_blob(self, data, overwrite=False):
+        self.uploads.append((self.name, data.read(), overwrite))
+
+
+class FakeAzureContainer:
+    def __init__(self, uploads):
+        self.uploads = uploads
+
+    def get_blob_client(self, name):
+        return FakeAzureBlob(self.uploads, name)
+
+
+class FakeAzure:
+    def __init__(self):
+        self.uploads = []
+        self.containers = []
+
+    def get_container_client(self, name):
+        self.containers.append(name)
+        return FakeAzureContainer(self.uploads)
 
 
 def test_storage_factory_defaults_to_filesystem(tmp_path):
@@ -114,3 +141,41 @@ def test_gcs_storage_mirrors_items_and_comments(tmp_path):
         "prod/social/twitter/post_1.json",
         "prod/social/twitter/post_1_comments.json",
     ]
+
+
+def test_azure_blob_storage_mirrors_items_and_comments(tmp_path):
+    client = FakeAzure()
+    storage = AzureBlobStorage(
+        output_dir=str(tmp_path / "output"),
+        media_dir=str(tmp_path / "output" / "images"),
+        logger=logging.getLogger("test"),
+        container="archive",
+        prefix="prod/social",
+        client=client,
+    )
+    item = Item(
+        id="post/1",
+        source="twitter",
+        target="@example",
+        text="hello",
+        comments=[{"id": "c1", "text": "reply"}],
+    )
+
+    item_path = storage.write_item(item)
+    comments_path = storage.write_comments(item)
+
+    assert client.containers == ["archive"]
+    assert json.loads(item_path.read_text(encoding="utf-8"))["text"] == "hello"
+    assert comments_path is not None
+    assert [(upload[0], upload[2]) for upload in client.uploads] == [
+        ("prod/social/twitter/post_1.json", True),
+        ("prod/social/twitter/post_1_comments.json", True),
+    ]
+
+
+def test_azure_backend_requires_a_container():
+    with pytest.raises(ValueError, match="storage.azure.container"):
+        create_storage(
+            {"storage": {"backend": "azure", "azure": {}}},
+            logging.getLogger("test"),
+        )

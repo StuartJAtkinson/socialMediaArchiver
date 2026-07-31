@@ -51,7 +51,8 @@ log_file: "./output/scraper.log"
 # Storage backend. "filesystem" is dependency-free. Remote backends retain the
 # same local cache for the dashboard. "s3" supports AWS S3, MinIO, Backblaze
 # B2, Cloudflare R2, and similar endpoints (requires boto3); "gcs" is native
-# Google Cloud Storage (requires google-cloud-storage).
+# Google Cloud Storage (requires google-cloud-storage); "azure" is native Azure
+# Blob Storage (requires azure-storage-blob).
 storage:
   backend: filesystem
   output_dir: "./output"
@@ -65,6 +66,10 @@ storage:
     bucket: ""
     prefix: "social-media-archive"
     project: "" # optional; otherwise uses the standard Google credential chain
+  azure:
+    container: ""
+    prefix: "social-media-archive"
+    connection_string: "" # keep this in an ignored local config file
 
 # ─── Proxy / Tor ────────────────────────────────────────────────────────────
 # Set proxy_url to enable proxy rotation (http/socks5).
