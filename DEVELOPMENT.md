@@ -33,9 +33,9 @@ context to diagnose the target and provider.
 ## Storage backends
 
 `core.storage.create_storage()` selects the backend. Filesystem storage is the
-local source of truth for the dashboard. `S3Storage` extends it by uploading each
-successful local write. New backends must preserve `write_item`,
-`write_comments`, and `download_media` behavior.
+local source of truth for the dashboard. `S3Storage` and `GCSStorage` extend it
+by uploading each successful local write. New backends must preserve
+`write_item`, `write_comments`, and `download_media` behavior.
 
 ## Tests
 

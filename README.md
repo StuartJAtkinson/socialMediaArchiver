@@ -89,6 +89,32 @@ storage:
 Authentication uses boto3’s standard credential chain. Files remain local for
 the dashboard and are uploaded after each successful write.
 
+### Google Cloud Storage
+
+To mirror the local cache to a Google Cloud Storage bucket:
+
+```powershell
+python -m pip install google-cloud-storage
+```
+
+Then set:
+
+```yaml
+storage:
+  backend: gcs
+  output_dir: "./output"
+  images_dir: "./output/images"
+  gcs:
+    bucket: "my-archive"
+    prefix: "social-media"
+    project: "my-gcp-project" # optional when credentials provide a project
+```
+
+Authentication uses the standard Google Application Default Credentials chain,
+including `GOOGLE_APPLICATION_CREDENTIALS`, user ADC, and attached service
+accounts. Files remain local for the dashboard and are uploaded after each
+successful write.
+
 ## Architecture
 
 ```text
@@ -99,7 +125,7 @@ main.py → core/orchestrator.py → connectors/<source>.py
                   │
                   ├─ checkpoint / rate limiting
                   ├─ normalized Item model
-                  └─ filesystem or S3-mirrored storage
+                  └─ filesystem, S3, or GCS-mirrored storage
                                       │
                                       ▼
                                   output/

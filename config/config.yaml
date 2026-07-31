@@ -48,9 +48,10 @@ images_dir: "./output/images"
 # cache_dir: "./output/.cache"
 log_file: "./output/scraper.log"
 
-# Storage backend. "filesystem" is dependency-free. "s3" keeps the same local
-# cache for the dashboard and mirrors objects to AWS S3, MinIO, Backblaze B2,
-# Cloudflare R2, or another S3-compatible endpoint (requires boto3).
+# Storage backend. "filesystem" is dependency-free. Remote backends retain the
+# same local cache for the dashboard. "s3" supports AWS S3, MinIO, Backblaze
+# B2, Cloudflare R2, and similar endpoints (requires boto3); "gcs" is native
+# Google Cloud Storage (requires google-cloud-storage).
 storage:
   backend: filesystem
   output_dir: "./output"
@@ -60,6 +61,10 @@ storage:
     prefix: "social-media-archive"
     region: ""
     endpoint_url: ""
+  gcs:
+    bucket: ""
+    prefix: "social-media-archive"
+    project: "" # optional; otherwise uses the standard Google credential chain
 
 # ─── Proxy / Tor ────────────────────────────────────────────────────────────
 # Set proxy_url to enable proxy rotation (http/socks5).

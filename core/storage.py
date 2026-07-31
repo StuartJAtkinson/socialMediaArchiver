@@ -7,7 +7,8 @@ image downloader, generalized to any media type and reused by every connector.
 The default ``filesystem`` backend behaves exactly as before. The optional
 ``s3`` backend keeps that local cache (so the dashboard remains browsable) and
 mirrors every record, comment sidecar, and downloaded media object to an
-S3-compatible bucket.
+S3-compatible bucket. The ``gcs`` backend provides the same local-first
+mirroring behavior for Google Cloud Storage.
 """
 
 from __future__ import annotations
@@ -190,11 +191,69 @@ class S3Storage(Storage):
         return path
 
 
+class GCSStorage(Storage):
+    """Filesystem cache mirrored to a native Google Cloud Storage bucket."""
+
+    def __init__(
+        self,
+        output_dir: str,
+        media_dir: str,
+        logger: logging.Logger,
+        bucket: str,
+        prefix: str = "",
+        project: str | None = None,
+        client: Any = None,
+    ):
+        if not bucket:
+            raise ValueError("storage.gcs.bucket is required for the gcs backend")
+        super().__init__(output_dir, media_dir, logger)
+        if client is None:
+            try:
+                from google.cloud import storage as gcs_storage
+            except ImportError as exc:
+                raise RuntimeError(
+                    "The gcs backend requires google-cloud-storage. Install it with: "
+                    "pip install google-cloud-storage"
+                ) from exc
+            client = gcs_storage.Client(project=project or None)
+        self.client = client
+        self.bucket = bucket
+        self.prefix = prefix.strip("/")
+        self._bucket = client.bucket(bucket)
+
+    def _key(self, relative: str) -> str:
+        relative = relative.replace("\\", "/").lstrip("/")
+        return f"{self.prefix}/{relative}" if self.prefix else relative
+
+    def _upload(self, path: Path, relative: str) -> None:
+        key = self._key(relative)
+        self._bucket.blob(key).upload_from_filename(str(path))
+        self.logger.info("Uploaded gs://%s/%s", self.bucket, key)
+
+    def download_media(self, url: str, item_uid: str, index: int = 0) -> Optional[str]:
+        local = super().download_media(url, item_uid, index)
+        if local:
+            path = Path(local)
+            self._upload(path, f"images/{path.name}")
+        return local
+
+    def write_item(self, item: Item) -> Path:
+        path = super().write_item(item)
+        self._upload(path, f"{_safe(item.source)}/{path.name}")
+        return path
+
+    def write_comments(self, item: Item) -> Optional[Path]:
+        path = super().write_comments(item)
+        if path:
+            self._upload(path, f"{_safe(item.source)}/{path.name}")
+        return path
+
+
 def create_storage(config: dict, logger: logging.Logger) -> Storage:
     """Build the configured storage backend.
 
-    ``storage.backend`` accepts ``filesystem`` (default) or ``s3``. Legacy
-    top-level ``output_dir``/``images_dir`` settings remain supported.
+    ``storage.backend`` accepts ``filesystem`` (default), ``s3``, or ``gcs``.
+    Legacy top-level ``output_dir``/``images_dir`` settings remain supported.
     """
     storage_config = config.get("storage", {}) or {}
     backend = str(storage_config.get("backend", "filesystem")).lower()
@@ -217,6 +276,16 @@ def create_storage(config: dict, logger: logging.Logger) -> Storage:
             endpoint_url=s3.get("endpoint_url"),
             region=s3.get("region"),
         )
+    if backend == "gcs":
+        gcs = storage_config.get("gcs", {}) or {}
+        return GCSStorage(
+            output_dir=output_dir,
+            media_dir=media_dir,
+            logger=logger,
+            bucket=gcs.get("bucket", ""),
+            prefix=gcs.get("prefix", ""),
+            project=gcs.get("project"),
+        )
     raise ValueError(
-        f"Unknown storage backend '{backend}'. Expected: filesystem or s3"
+        f"Unknown storage backend '{backend}'. Expected: filesystem, s3, or gcs"
     )
