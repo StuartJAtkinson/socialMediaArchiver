@@ -349,6 +349,12 @@
             border-color: rgba(146,64,14,.6);
         }
 
+        .status.error {
+            background: rgba(127,29,29,.25);
+            color: #fca5a5;
+            border-color: rgba(153,27,27,.7);
+        }
+
         .accounts-grid {
             gap: 8px;
         }
@@ -547,9 +553,7 @@
                 }
             } catch (error) {
                 status.style.display = 'block';
-                status.className = 'status';
-                status.style.background = '#f8d7da';
-                status.style.color = '#721c24';
+                status.className = 'status error';
                 status.textContent = 'Error starting archive: ' + error.message;
                 btn.disabled = false;
                 btn.textContent = 'Start Archiving';
