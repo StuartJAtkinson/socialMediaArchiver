@@ -508,23 +508,11 @@
                 card.innerHTML = `
                     <span class="platform">${account.platform}</span>
                     <h3>@${account.account}</h3>
-                    <div class="stats">Loading stats...</div>
+                    <div class="stats">${account.post_count ?? 0} posts</div>
                     <a href="/account/${account.platform}/${account.account}" class="view-btn">View Posts</a>
                 `;
                 grid.appendChild(card);
-                
-                // Load stats for this account
-                loadAccountStats(account.platform, account.account, card.querySelector('.stats'));
             });
-        }
-
-        async function loadAccountStats(platform, account, statsElement) {
-            try {
-                // This would need a new API endpoint, for now just show basic info
-                statsElement.textContent = `Platform: ${platform}`;
-            } catch (error) {
-                statsElement.textContent = 'Stats unavailable';
-            }
         }
 
         async function startArchiving() {
