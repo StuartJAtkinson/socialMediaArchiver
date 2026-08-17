@@ -1,389 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media Archiver - Dashboard</title>
-    <style>
-        /* Homelab Designer visual language: dense, dark, bordered workspace. */
-        :root {
-            color-scheme: dark;
-            --canvas: #0f1117;
-            --band: #13151f;
-            --panel: #1a1d27;
-            --border: #2d3148;
-            --border-soft: #1e2030;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --faint: #64748b;
-            --accent: #818cf8;
-        }
-
-        body {
-            background: var(--canvas);
-            color: var(--text);
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
-                         BlinkMacSystemFont, "Segoe UI", sans-serif;
-            font-size: 14px;
-        }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-
-        .container {
-            max-width: 1400px;
-            padding: 12px 16px 24px;
-        }
-
-        .header {
-            position: relative;
-            min-height: 48px;
-            padding: 8px 14px;
-            margin-bottom: 8px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            box-shadow: none;
-        }
-
-        .header h1 {
-            margin: 0;
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .header p {
-            color: var(--faint);
-            font-size: 0.72rem;
-        }
-
-        .stats-grid {
-            gap: 1px;
-            margin-bottom: 8px;
-            overflow: hidden;
-            background: var(--border);
-            border: 1px solid var(--border);
-            border-radius: 7px;
-        }
-
-        .stat-card {
-            padding: 9px 12px;
-            background: var(--band);
-            border-radius: 0;
-            box-shadow: none;
-            text-align: left;
-        }
-
-        .stat-card h3 {
-            margin-bottom: 2px;
-            color: var(--faint);
-            font-size: 0.62rem;
-            letter-spacing: .08em;
-        }
-
-        .stat-card .number {
-            color: #cbd5e1;
-            font-size: 1rem;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .control-panel {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-height: 42px;
-            padding: 7px 10px;
-            margin-bottom: 12px;
-            background: var(--band);
-            border: 1px solid var(--border);
-            border-radius: 7px;
-            box-shadow: none;
-        }
-
-        .control-panel h2 {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .archive-btn,
-        .account-card .view-btn {
-            padding: 6px 10px;
-            background: rgba(49,46,129,.25);
-            color: #c7d2fe;
-            border: 1px solid rgba(79,70,229,.65);
-            border-radius: 7px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            line-height: 1.2;
-        }
-
-        .archive-btn:hover,
-        .account-card .view-btn:hover {
-            background: rgba(49,46,129,.48);
-            color: #fff;
-            box-shadow: none;
-            transform: none;
-        }
-
-        .archive-btn:disabled {
-            background: transparent;
-            color: var(--faint);
-            border-color: var(--border);
-            opacity: .65;
-        }
-
-        .status {
-            flex: 1;
-            margin: 0;
-            padding: 5px 8px;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-
-        .status.running {
-            background: rgba(120,53,15,.22);
-            color: #fbbf24;
-            border-color: rgba(146,64,14,.6);
-        }
-
-        .status.error {
-            background: rgba(127,29,29,.25);
-            color: #fca5a5;
-            border-color: rgba(153,27,27,.7);
-        }
-
-        .accounts-grid {
-            gap: 8px;
-        }
-
-        .account-card {
-            padding: 11px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            box-shadow: none;
-            transition: border-color .12s ease, background-color .12s ease;
-        }
-
-        .account-card:hover {
-            transform: none;
-            background: #1c1f2b;
-            border-color: #414660;
-            box-shadow: none;
-        }
-
-        .account-card h3 {
-            margin: 5px 0 2px;
-            color: #fff;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .account-card .platform {
-            margin: 0;
-            padding: 2px 6px;
-            background: var(--band);
-            color: var(--muted);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 0.6rem;
-            letter-spacing: .05em;
-        }
-
-        .account-card .stats {
-            color: var(--faint);
-            font-size: 0.7rem;
-        }
-
-        .account-card .view-btn {
-            margin-top: 4px;
-        }
-
-        .loading,
-        .empty-state {
-            color: var(--faint);
-        }
-
-        .empty-state h3 {
-            color: var(--text);
-        }
-
-        @media (max-width: 600px) {
-            .header {
-                text-align: left;
-            }
-
-            .header h1,
-            .header p {
-                text-align: left;
-            }
-
-            .control-panel {
-                flex-wrap: wrap;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Media Archiver — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/dashboard.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>📚 Social Media Archiver</h1>
-            <p>Archive and view your social media posts locally</p>
-        </div>
-        
-        <div class="stats-grid" id="stats-grid">
-            <div class="stat-card">
-                <h3>Accounts</h3>
-                <div class="number" id="total-accounts">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Total Posts</h3>
-                <div class="number" id="total-posts">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Images</h3>
-                <div class="number" id="total-images">-</div>
-            </div>
-            <div class="stat-card">
-                <h3>Videos</h3>
-                <div class="number" id="total-videos">-</div>
-            </div>
-        </div>
-        
-        <div class="control-panel">
-            <h2>🚀 Archive Control</h2>
-            <button id="archive-btn" class="archive-btn" onclick="startArchiving()">
-                Start Archiving
-            </button>
-            <div id="status" class="status" style="display: none;"></div>
-        </div>
-        
-        <h2 style="margin-bottom: 10px; font-size: 1.25rem;">📁 Archived Accounts</h2>
-        <div id="accounts-container">
-            <div class="loading">Loading accounts...</div>
-        </div>
+<body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
+  {% include "_nav.html" %}
+
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <h1>Dashboard</h1>
+      <p>Archive and view your social media posts locally. Pick a stage to get started.</p>
     </div>
 
-    <script>
-        let statusInterval;
+    <!-- Summary tiles -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-px mb-5 panel" style="background:var(--border)">
+      <div class="stat-tile">
+        <h3>ACCOUNTS</h3>
+        <div class="number" x-text="stats.total_accounts ?? '—'"></div>
+      </div>
+      <div class="stat-tile">
+        <h3>TOTAL POSTS</h3>
+        <div class="number" x-text="stats.total_posts ?? '—'"></div>
+      </div>
+      <div class="stat-tile">
+        <h3>IMAGES</h3>
+        <div class="number" x-text="stats.total_images ?? '—'"></div>
+      </div>
+      <div class="stat-tile">
+        <h3>VIDEOS</h3>
+        <div class="number" x-text="stats.total_videos ?? '—'"></div>
+      </div>
+    </div>
 
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/stats');
-                const data = await response.json();
-                
-                document.getElementById('total-accounts').textContent = data.total_accounts;
-                document.getElementById('total-posts').textContent = data.total_posts;
-                document.getElementById('total-images').textContent = data.total_images;
-                document.getElementById('total-videos').textContent = data.total_videos;
-                
-                renderAccounts(data.accounts);
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
+    <!-- Quick actions + recent runs -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="panel p-4 lg:col-span-2">
+        <h2 class="text-sm font-semibold text-white mb-2">Recent runs</h2>
+        <template x-if="recent.length === 0">
+          <p class="text-xs" style="color:var(--faint)">No runs yet. Go to <a href="/run" style="color:var(--accent)">Run</a> to start one.</p>
+        </template>
+        <template x-for="run in recent" :key="run.id">
+          <div class="flex items-center justify-between py-1.5 border-b" style="border-color:var(--border-soft)">
+            <div>
+              <div class="text-xs" style="color:var(--text)" x-text="run.id.slice(0,8)"></div>
+              <div class="text-xs" style="color:var(--faint)" x-text="fmt(run.started_at) + ' · ' + run.trigger"></div>
+            </div>
+            <span class="status" :class="run.status" x-text="run.status"></span>
+          </div>
+        </template>
+      </div>
 
-        function renderAccounts(accounts) {
-            const container = document.getElementById('accounts-container');
-            
-            if (accounts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <h3>No archived accounts yet</h3>
-                        <p>Click "Start Archiving" to begin archiving your configured accounts.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = '<div class="accounts-grid" id="accounts-grid"></div>';
-            const grid = document.getElementById('accounts-grid');
-            
-            accounts.forEach(account => {
-                const card = document.createElement('div');
-                card.className = 'account-card';
-                card.innerHTML = `
-                    <span class="platform">${account.platform}</span>
-                    <h3>@${account.account}</h3>
-                    <div class="stats">${account.post_count ?? 0} posts</div>
-                    <a href="/account/${account.platform}/${account.account}" class="view-btn">View Posts</a>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        async function startArchiving() {
-            const btn = document.getElementById('archive-btn');
-            const status = document.getElementById('status');
-            
-            btn.disabled = true;
-            btn.textContent = 'Starting...';
-            
-            try {
-                const response = await fetch('/api/archive/start', { method: 'POST' });
-                const data = await response.json();
-                
-                if (data.status === 'started') {
-                    status.style.display = 'block';
-                    status.className = 'status running';
-                    status.textContent = 'Archiving in progress...';
-                    
-                    // Start polling for status
-                    statusInterval = setInterval(checkArchiveStatus, 2000);
-                } else if (data.status === 'already_running') {
-                    status.style.display = 'block';
-                    status.className = 'status running';
-                    status.textContent = 'Archiving already running...';
-                    statusInterval = setInterval(checkArchiveStatus, 2000);
-                }
-            } catch (error) {
-                status.style.display = 'block';
-                status.className = 'status error';
-                status.textContent = 'Error starting archive: ' + error.message;
-                btn.disabled = false;
-                btn.textContent = 'Start Archiving';
-            }
-        }
-
-        async function checkArchiveStatus() {
-            try {
-                const response = await fetch('/api/archive/status');
-                const data = await response.json();
-                
-                const btn = document.getElementById('archive-btn');
-                const status = document.getElementById('status');
-                
-                if (data.is_archiving) {
-                    btn.disabled = true;
-                    btn.textContent = 'Archiving...';
-                    status.style.display = 'block';
-                    status.className = 'status running';
-                    status.textContent = 'Archiving in progress...';
-                } else {
-                    btn.disabled = false;
-                    btn.textContent = 'Start Archiving';
-                    status.style.display = 'none';
-                    clearInterval(statusInterval);
-                    
-                    // Reload stats and accounts
-                    loadStats();
-                }
-            } catch (error) {
-                console.error('Error checking status:', error);
-            }
-        }
-
-        // Load initial data
-        loadStats();
-        
-        // Check archive status on page load
-        checkArchiveStatus();
-    </script>
+      <div class="panel p-4">
+        <h2 class="text-sm font-semibold text-white mb-2">Quick links</h2>
+        <ul class="text-xs space-y-1.5" style="color:var(--muted)">
+          <li><a href="/connect" style="color:var(--accent)">Connect</a> — credentials per source</li>
+          <li><a href="/configure" style="color:var(--accent)">Configure</a> — what to archive</li>
+          <li><a href="/storage" style="color:var(--accent)">Storage</a> — where it lives</li>
+          <li><a href="/schedule" style="color:var(--accent)">Schedule</a> — periodic crawls</li>
+          <li><a href="/run" style="color:var(--accent)">Run</a> — start a crawl</li>
+          <li><a href="/browse" style="color:var(--accent)">Browse</a> — read what you have</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

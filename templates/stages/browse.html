@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse — Social Media Archiver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/browse.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
+  {% with stage_actions = '' %}
+    {% include "_nav.html" %}
+  {% endwith %}
+
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <h1>Browse</h1>
+      <p>Browse everything you've already archived.</p>
+    </div>
+
+    <!-- Summary tiles -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-px mb-5 panel" style="background:var(--border)">
+      <div class="stat-tile">
+        <h3>ACCOUNTS</h3>
+        <div class="number" x-text="stats.total_accounts ?? '—'"></div>
+      </div>
+      <div class="stat-tile">
+        <h3>TOTAL POSTS</h3>
+        <div class="number" x-text="stats.total_posts ?? '—'"></div>
+      </div>
+      <div class="stat-tile">
+        <h3>IMAGES</h3>
+        <div class="number" x-text="stats.total_images ?? '—'"></div>
+      </div>
+      <div class="stat-tile">
+        <h3>VIDEOS</h3>
+        <div class="number" x-text="stats.total_videos ?? '—'"></div>
+      </div>
+    </div>
+
+    <h2 class="text-sm font-semibold text-white mb-2">Archived accounts</h2>
+    <div id="accounts-container">
+      <template x-if="loading">
+        <p class="text-xs" style="color:var(--faint)">Loading accounts…</p>
+      </template>
+      <template x-if="!loading && accounts.length === 0">
+        <div class="panel p-5">
+          <h3 class="text-sm font-semibold text-white mb-1">No archived accounts yet</h3>
+          <p class="text-xs" style="color:var(--muted)">
+            Head to <a href="/run" style="color:var(--accent)">Run</a> to start a crawl,
+            or <a href="/configure" style="color:var(--accent)">Configure</a> to pick what to archive.
+          </p>
+        </div>
+      </template>
+      <div x-show="!loading && accounts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <template x-for="account in accounts" :key="account.platform + ':' + account.account">
+          <div class="account-card">
+            <span class="platform" x-text="account.platform"></span>
+            <h3 x-text="'@' + account.account"></h3>
+            <div class="stats" x-text="(account.post_count ?? 0) + ' posts'"></div>
+            <a :href="'/account/' + account.platform + '/' + account.account" class="view-btn">View Posts</a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

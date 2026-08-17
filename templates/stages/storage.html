@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Storage — Social Media Archiver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/storage.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
+  {% with stage_actions = '' %}
+    {% include "_nav.html" %}
+  {% endwith %}
+
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <h1>Storage</h1>
+      <p>Choose where archived posts and media live. Remote backends mirror writes — your local cache stays browsable.</p>
+    </div>
+
+    <div class="panel p-4">
+      <label class="field-label">Backend</label>
+      <div class="flex flex-wrap gap-2 mb-5">
+        <template x-for="b in backends" :key="b">
+          <label class="cursor-pointer">
+            <input type="radio" name="backend" class="peer hidden" :value="b" x-model="draft.backend" />
+            <span class="status idle peer-checked:status-done peer-checked:border-0 px-3 py-1.5 text-xs"
+                  :class="draft.backend === b ? 'status-done' : 'idle'"
+                  x-text="b"></span>
+          </label>
+        </template>
+      </div>
+
+      <!-- Local paths (all backends) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+        <div>
+          <label class="field-label">Output dir</label>
+          <input type="text" class="field-input" x-model="draft.output_dir" />
+        </div>
+        <div>
+          <label class="field-label">Images dir</label>
+          <input type="text" class="field-input" x-model="draft.images_dir" />
+        </div>
+      </div>
+
+      <!-- s3 fields -->
+      <div x-show="draft.backend === 's3'" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+        <div>
+          <label class="field-label">S3 bucket</label>
+          <input type="text" class="field-input" x-model="draft.s3.bucket" />
+        </div>
+        <div>
+          <label class="field-label">Prefix</label>
+          <input type="text" class="field-input" x-model="draft.s3.prefix" />
+        </div>
+        <div>
+          <label class="field-label">Region</label>
+          <input type="text" class="field-input" x-model="draft.s3.region" placeholder="us-east-1" />
+        </div>
+        <div>
+          <label class="field-label">Endpoint URL</label>
+          <input type="text" class="field-input" x-model="draft.s3.endpoint_url"
+                 placeholder="(optional — for S3-compatible)" />
+        </div>
+      </div>
+
+      <!-- gcs fields -->
+      <div x-show="draft.backend === 'gcs'" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+        <div>
+          <label class="field-label">GCS bucket</label>
+          <input type="text" class="field-input" x-model="draft.gcs.bucket" />
+        </div>
+        <div>
+          <label class="field-label">Prefix</label>
+          <input type="text" class="field-input" x-model="draft.gcs.prefix" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="field-label">Project</label>
+          <input type="text" class="field-input" x-model="draft.gcs.project" />
+        </div>
+      </div>
+
+      <!-- azure fields -->
+      <div x-show="draft.backend === 'azure'" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+        <div>
+          <label class="field-label">Container</label>
+          <input type="text" class="field-input" x-model="draft.azure.container" />
+        </div>
+        <div>
+          <label class="field-label">Prefix</label>
+          <input type="text" class="field-input" x-model="draft.azure.prefix" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="field-label">Connection string</label>
+          <input type="password" class="field-input" x-model="draft.azure.connection_string"
+                 placeholder="(stored — leave *** to keep current)" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mt-4">
+        <button @click="save()" :disabled="busy" class="stage-actions" style="cursor:pointer">
+          <span x-show="!busy">Save</span>
+          <span x-show="busy">Saving…</span>
+        </button>
+        <button @click="reload()" class="stage-actions" style="cursor:pointer">Reload</button>
+        <span class="field-success" x-show="okMsg" x-text="okMsg"></span>
+        <span class="field-error" x-show="errorMsg" x-text="errorMsg"></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,331 @@
+/* Shared base styles for the Social Media Archiver tabbed dashboard.
+   Mirrors the homelab-designer palette and density. */
+
+:root {
+  color-scheme: dark;
+  --canvas: #0f1117;
+  --band: #13151f;
+  --panel: #1a1d27;
+  --border: #2d3148;
+  --border-soft: #1e2030;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --faint: #64748b;
+  --accent: #818cf8;
+  --accent-fg: #c7d2fe;
+  --accent-bg: rgba(49, 46, 129, .25);
+  --accent-bg-hover: rgba(49, 46, 129, .48);
+  --accent-border: rgba(79, 70, 229, .65);
+  --status-running-bg: rgba(120, 53, 15, .22);
+  --status-running-fg: #fbbf24;
+  --status-running-border: rgba(146, 64, 14, .6);
+  --status-error-bg: rgba(127, 29, 29, .25);
+  --status-error-fg: #fca5a5;
+  --status-error-border: rgba(153, 27, 27, .7);
+  --status-done-bg: rgba(20, 83, 45, .22);
+  --status-done-fg: #86efac;
+  --status-done-border: rgba(22, 101, 52, .6);
+}
+
+[x-cloak] { display: none !important; }
+
+body {
+  background: var(--canvas);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+               BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* Tab strip nav (used by every stage page via _nav.html). */
+.stage-nav {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.stage-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .08s ease, background-color .08s ease;
+}
+
+.stage-nav a:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, .05);
+}
+
+.stage-nav a.active {
+  color: var(--text);
+  background: rgba(255, 255, 255, .10);
+}
+
+.stage-nav .stage-label {
+  color: var(--text);
+}
+
+.stage-actions a,
+.stage-actions button {
+  color: var(--accent-fg);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background-color .08s ease;
+  text-decoration: none;
+}
+
+.stage-actions a:hover,
+.stage-actions button:hover {
+  background: var(--accent-bg-hover);
+  color: #fff;
+}
+
+.stage-actions a:disabled,
+.stage-actions button:disabled {
+  background: transparent;
+  color: var(--faint);
+  border-color: var(--border);
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+/* Per-stage intro header. */
+.stage-header h1 {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stage-header p {
+  color: var(--faint);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* Reusable card / panel surfaces. */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.panel-band {
+  background: var(--band);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Summary tile (used on landing + browse). */
+.stat-tile {
+  background: var(--band);
+  padding: 10px 14px;
+}
+
+.stat-tile h3 {
+  color: var(--faint);
+  font-size: 10px;
+  letter-spacing: .08em;
+  margin: 0 0 2px;
+}
+
+.stat-tile .number {
+  color: var(--text);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status pills (running / error / done). */
+.status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.status.running {
+  background: var(--status-running-bg);
+  color: var(--status-running-fg);
+  border: 1px solid var(--status-running-border);
+}
+
+.status.error {
+  background: var(--status-error-bg);
+  color: var(--status-error-fg);
+  border: 1px solid var(--status-error-border);
+}
+
+.status.done {
+  background: var(--status-done-bg);
+  color: var(--status-done-fg);
+  border: 1px solid var(--status-done-border);
+}
+
+.status.idle {
+  background: transparent;
+  color: var(--faint);
+  border: 1px solid var(--border);
+}
+
+/* Form controls. */
+.field-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.field-input {
+  background: var(--band);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 13px;
+  width: 100%;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  background: var(--canvas);
+}
+
+.field-hint {
+  color: var(--faint);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.field-error {
+  color: var(--status-error-fg);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.field-success {
+  color: var(--status-done-fg);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Account cards (Browse). */
+.account-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  transition: background-color .12s ease, border-color .12s ease;
+}
+
+.account-card:hover {
+  background: #1c1f2b;
+  border-color: #414660;
+}
+
+.account-card .platform {
+  background: var(--band);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  letter-spacing: .05em;
+  display: inline-block;
+}
+
+.account-card h3 {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 6px 0 2px;
+}
+
+.account-card .stats {
+  color: var(--faint);
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.account-card a.view-btn {
+  color: var(--accent-fg);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.account-card a.view-btn:hover {
+  background: var(--accent-bg-hover);
+  color: #fff;
+}
+
+/* Per-target row in the Run tab. */
+.target-row {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.target-row .target-key {
+  color: var(--text);
+  font-size: 13px;
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.target-row .target-count {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Banner used by Schedule for the 'restart required' warning. */
+.banner-warn {
+  background: var(--status-running-bg);
+  color: var(--status-running-fg);
+  border: 1px solid var(--status-running-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+/* Source-tab strip inside Connect stage. */
+.source-tabs button {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid transparent;
+  border-bottom-color: var(--border);
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.source-tabs button:hover {
+  color: var(--text);
+}
+
+.source-tabs button.active {
+  color: var(--text);
+  border-color: var(--border);
+  border-bottom-color: transparent;
+  background: var(--band);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}

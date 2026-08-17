@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configure — Social Media Archiver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/configure.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
+  {% with stage_actions = '' %}
+    {% include "_nav.html" %}
+  {% endwith %}
+
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <h1>Configure</h1>
+      <p>Choose what to archive. One {source, target} row per thing you want to crawl.</p>
+    </div>
+
+    <!-- Existing targets -->
+    <div class="panel p-4 mb-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-semibold text-white">Targets</h2>
+        <span class="text-xs" style="color:var(--muted)" x-text="rows.length + ' row(s)'"></span>
+      </div>
+      <template x-if="loading">
+        <p class="text-xs" style="color:var(--faint)">Loading…</p>
+      </template>
+      <template x-if="!loading && rows.length === 0">
+        <p class="text-xs" style="color:var(--faint)">No targets yet. Add one below.</p>
+      </template>
+      <div x-show="!loading && rows.length > 0" class="space-y-2">
+        <template x-for="(row, idx) in rows" :key="row.source + ':' + row.target">
+          <div class="target-row">
+            <span class="status idle" x-text="row.source"></span>
+            <span class="flex-1 font-mono text-xs truncate" x-text="row.target"></span>
+            <button @click="remove(row)" :disabled="busy" class="stage-actions" style="cursor:pointer">Remove</button>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Add row form -->
+    <div class="panel p-4">
+      <h2 class="text-sm font-semibold text-white mb-3">Add target</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Source</label>
+          <select class="field-input" x-model="draft.source">
+            <option value="">Select a source…</option>
+            <template x-for="s in sources" :key="s">
+              <option :value="s" x-text="s"></option>
+            </template>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Target</label>
+          <input type="text" class="field-input" x-model="draft.target"
+                 placeholder="@handle | r/sub | feed URL | channel id" />
+        </div>
+      </div>
+      <p class="field-hint">Twitter/Facebook may need credentials configured under <a href="/connect" style="color:var(--accent)">Connect</a> before they will crawl.</p>
+      <div class="flex items-center gap-3 mt-4">
+        <button @click="add()" :disabled="busy || !canAdd" class="stage-actions" style="cursor:pointer">
+          <span x-show="!busy">Add</span>
+          <span x-show="busy">Adding…</span>
+        </button>
+        <span class="field-success" x-show="okMsg" x-text="okMsg"></span>
+        <span class="field-error" x-show="errorMsg" x-text="errorMsg"></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

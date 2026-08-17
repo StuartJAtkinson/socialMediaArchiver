@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule — Social Media Archiver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/schedule.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
+  {% with stage_actions = '' %}
+    {% include "_nav.html" %}
+  {% endwith %}
+
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <h1>Schedule</h1>
+      <p>How often to crawl while this dashboard is running. Changes take effect on next process restart.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Status pills -->
+      <div class="panel p-4">
+        <h2 class="text-sm font-semibold text-white mb-3">Current state</h2>
+        <div class="space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <span style="color:var(--muted)">In YAML</span>
+            <span class="status idle" x-text="yamlValue + ' min'"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span style="color:var(--muted)">Active in this process</span>
+            <span class="status idle" x-text="activeValue + ' min'"></span>
+          </div>
+        </div>
+        <template x-if="restartNeeded">
+          <div class="banner-warn mt-4">
+            Restart the dashboard to apply the new interval.
+          </div>
+        </template>
+        <template x-if="!restartNeeded && activeValue > 0">
+          <p class="text-xs mt-4" style="color:var(--status-done-fg)">Scheduling is running.</p>
+        </template>
+        <template x-if="!restartNeeded && activeValue === 0">
+          <p class="text-xs mt-4" style="color:var(--faint)">Scheduling is disabled (interval is 0).</p>
+        </template>
+      </div>
+
+      <!-- Editor -->
+      <div class="panel p-4 md:col-span-2">
+        <h2 class="text-sm font-semibold text-white mb-3">Edit YAML</h2>
+        <label class="field-label">Interval (minutes)</label>
+        <input type="number" min="0" step="1" class="field-input"
+               x-model.number="draft" />
+        <p class="field-hint">Set to 0 to disable scheduled crawls. The dashboard process must be restarted for the new value to take effect.</p>
+
+        <div class="flex items-center gap-3 mt-4">
+          <button @click="save()" :disabled="saving" class="stage-actions" style="cursor:pointer">
+            <span x-show="!saving">Save</span>
+            <span x-show="saving">Saving…</span>
+          </button>
+          <button @click="reload()" class="stage-actions" style="cursor:pointer">Reload</button>
+          <span class="field-success" x-show="okMsg" x-text="okMsg"></span>
+          <span class="field-error" x-show="errorMsg" x-text="errorMsg"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

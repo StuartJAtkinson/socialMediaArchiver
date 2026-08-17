@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect — Social Media Archiver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/connect.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
+  {% with stage_actions = '' %}
+    {% include "_nav.html" %}
+  {% endwith %}
+
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <h1>Connect</h1>
+      <p>Provide API tokens and connector options. Environment variables still win at runtime — YAML values are fallbacks.</p>
+    </div>
+
+    <!-- Source tabs -->
+    <div class="flex flex-wrap gap-2 mb-5">
+      <template x-for="s in sources" :key="s">
+        <button @click="active = s"
+                class="status idle"
+                :class="active === s ? 'status-done' : 'idle'"
+                style="cursor:pointer"
+                x-text="s"></button>
+      </template>
+    </div>
+
+    <div class="panel p-4">
+      <template x-if="active && draft[active]">
+        <div>
+          <h2 class="text-sm font-semibold text-white mb-1" x-text="active"></h2>
+          <p class="field-hint mb-4" x-text="hint(active)"></p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <template x-for="(value, key) in draft[active]" :key="key">
+              <div>
+                <label class="field-label" x-text="key"></label>
+                <input type="text"
+                       class="field-input"
+                       :class="isSecret(active, key) ? 'font-mono' : ''"
+                       x-model="draft[active][key]" />
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+      <template x-if="!active || !draft[active]">
+        <p class="text-xs" style="color:var(--faint)">Pick a source above.</p>
+      </template>
+
+      <div class="flex items-center gap-3 mt-5">
+        <button @click="save()" :disabled="busy" class="stage-actions" style="cursor:pointer">
+          <span x-show="!busy">Save</span>
+          <span x-show="busy">Saving…</span>
+        </button>
+        <button @click="reload()" class="stage-actions" style="cursor:pointer">Reload</button>
+        <span class="field-success" x-show="okMsg" x-text="okMsg"></span>
+        <span class="field-error" x-show="errorMsg" x-text="errorMsg"></span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

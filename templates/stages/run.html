@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run — Social Media Archiver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/run.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
+  {% with stage_actions = '' %}
+    {% include "_nav.html" %}
+  {% endwith %}
+
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <h1>Run</h1>
+      <p>Start a crawl. Each target's status updates live; the run is also logged to history.</p>
+    </div>
+
+    <!-- Status banner -->
+    <div class="panel p-4 mb-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <span class="text-xs" style="color:var(--muted)">Status</span>
+          <h2 class="text-sm font-semibold text-white">
+            <span class="status"
+                  :class="phaseClass(phase)"
+                  x-text="phase || 'idle'"></span>
+          </h2>
+          <p class="text-xs mt-1" style="color:var(--faint)" x-show="started_at">
+            Started <span x-text="fmt(started_at)"></span>
+            <span x-show="trigger"> · trigger <span x-text="trigger"></span></span>
+            <span x-show="finished_at"> · finished <span x-text="fmt(finished_at)"></span></span>
+          </p>
+          <p class="field-error mt-2" x-show="errorMsg" x-text="errorMsg"></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button @click="start()" :disabled="busy || phase === 'running'" class="stage-actions" style="cursor:pointer">
+            <span x-show="phase !== 'running'">Run now</span>
+            <span x-show="phase === 'running'">Running…</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Targets list -->
+      <template x-if="targets.length === 0">
+        <p class="text-xs" style="color:var(--faint)">No targets configured. Add some under <a href="/configure" style="color:var(--accent)">Configure</a> first.</p>
+      </template>
+      <div class="space-y-2" x-show="targets.length > 0">
+        <template x-for="t in targets" :key="t.key">
+          <div class="target-row">
+            <span class="status"
+                  :class="statusClass(t.status)"
+                  x-text="t.status"></span>
+            <span class="flex-1 font-mono text-xs truncate" x-text="t.key"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="panel p-4">
+      <h2 class="text-sm font-semibold text-white mb-3">Recent runs</h2>
+      <template x-if="history.length === 0">
+        <p class="text-xs" style="color:var(--faint)">No runs yet.</p>
+      </template>
+      <div class="space-y-1" x-show="history.length > 0">
+        <template x-for="h in history" :key="h.id || h.started_at">
+          <div class="text-xs flex items-center gap-2" style="color:var(--muted)">
+            <span class="status idle" x-text="h.status || 'unknown'"></span>
+            <span x-text="h.trigger || 'manual'"></span>
+            <span class="flex-1" x-text="fmt(h.started_at)"></span>
+            <span x-show="h.totals" x-text="h.totals && (h.totals.items || 0) + ' items'"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

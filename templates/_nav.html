@@ -1,0 +1,17 @@
+<!-- Shared nav strip — identical on every stage page. -->
+<nav class="stage-nav relative flex items-center px-4 py-2.5 flex-shrink-0">
+  <div class="flex items-center gap-0.5 flex-shrink-0">
+    {% for tab in tabs %}
+      <a href="/{{ tab.key }}"
+         class="px-2 py-1 rounded text-sm {% if tab.active %}active{% endif %}">
+        {{ tab.label }}
+      </a>
+    {% endfor %}
+  </div>
+  <span class="stage-label absolute left-1/2 -translate-x-1/2 font-semibold text-sm pointer-events-none">
+    {{ active_label }}
+  </span>
+  <div class="stage-actions ml-auto flex items-center gap-2 flex-shrink-0">
+    {{ stage_actions | safe }}
+  </div>
+</nav>

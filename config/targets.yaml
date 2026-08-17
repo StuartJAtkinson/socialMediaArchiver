@@ -1,14 +1,9 @@
-# Crawl targets — one entry per {source, target}.
-# Supported sources:
-#   youtube_community  target: @handle | channel_id | channel URL
-#   reddit             target: r/<subreddit> | u/<user>   (praw, falls back to .rss)
-#   rss                target: any RSS/Atom feed URL
-#   facebook           target: page slug or URL (Graph API -> auth browser -> public)
-
 targets:
-  - { source: youtube_community, target: "@ByteByteGo" }
-  - { source: rss,               target: "https://news.ycombinator.com/rss" }
-  - { source: reddit,            target: "r/programming" }
-  - { source: twitter,           target: "@ByteByteGo" }
-  # Facebook requires an official Graph API token (FB_GRAPH_TOKEN).
-  # - { source: facebook,          target: "https://www.facebook.com/Meta" }
+- source: youtube_community
+  target: '@ByteByteGo'
+- source: rss
+  target: https://news.ycombinator.com/rss
+- source: reddit
+  target: r/programming
+- source: twitter
+  target: '@ByteByteGo'
