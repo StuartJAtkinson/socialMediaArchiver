@@ -125,22 +125,36 @@ body {
   border-radius: 8px;
 }
 
-/* Summary tile (used on landing + browse). */
-.stat-tile {
+/* Key stats — ONE presentation everywhere the post/image/video counts appear
+   (landing, browse, account). A borderless row: the counts sit in the page
+   rather than in a boxed grid. Decided 2026-08-23, see ISSUES.md. */
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 28px;
   background: var(--band);
-  padding: 10px 14px;
+  padding: 7px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
 }
 
-.stat-tile h3 {
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.stat-item .label {
   color: var(--faint);
   font-size: 10px;
   letter-spacing: .08em;
-  margin: 0 0 2px;
+  text-transform: uppercase;
 }
 
-.stat-tile .number {
+.stat-item .value {
   color: var(--text);
-  font-size: 18px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
 

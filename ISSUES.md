@@ -2,12 +2,12 @@
 
 ## Open
 
-- [ ] **Secondary-link styling disagrees between templates** — decided: neutral is correct, `account.html` is right. Drop "View Posts" (`templates/index.html:311-321`) from the indigo/primary treatment to the neutral/transparent style `account.html:319-323` uses, so "Start Archiving" is the only filled button on the page. *(answered 2026-08-23)*
-- [ ] **Two "key stats" layouts for the same counts** — decided: borderless row everywhere. `templates/index.html:261-268`'s bordered `.stats-grid` becomes the `.stats-bar` flex row from `account.html:353-359`; the counts sit in the page rather than in a box. *(answered 2026-08-23)*
-- [ ] **Decorative emoji in `templates/index.html` headings** (📚/🚀/📁, lines 427/451/458) — decided: drop them. Plain headings on both templates; the archiver is a utility and the headings say what the section is without decoration. *(answered 2026-08-23)*
 
 
 ## Resolved
+- [x] **Secondary-link styling disagrees between templates** — decided: neutral is correct. Already delivered by the staged-tab refactor (deb7d74): the indigo "View Posts" CTA no longer exists and `account.html`'s `.back-btn` is the only secondary link, on the neutral/transparent style. Verified 2026-08-23 — no `indigo` classes remain in `templates/`. *(resolved 2026-08-23)*
+- [x] **Two "key stats" layouts for the same counts** — decided: borderless row everywhere. `.stat-tile` and its bordered `gap-px` grid are gone; `index.html`, `stages/browse.html` and `account.html` all render one `.stats-bar` row of `.stat-item`s, now defined once in `static/base.css`. `account.html` also drops its duplicated `:root`/body/scrollbar block and links `base.css` instead. All three pages verified 200 with the shared markup. *(resolved 2026-08-23)*
+- [x] **Decorative emoji in `templates/index.html` headings** — decided: drop them. Already delivered by the staged-tab refactor; a scan of `templates/**` on 2026-08-23 found no decorative emoji left. The ❤️/🔄/💬 in `account.html`'s `.post-metrics` are kept deliberately — they are the only label those like/retweet/reply counts have, so they carry meaning rather than decoration. *(resolved 2026-08-23)*
 - [x] **Dead legacy light-theme CSS block retained in both templates** — `templates/account.html:8-261` and `templates/index.html:8-203` are a full original light-theme stylesheet, entirely superseded by the dark-theme block appended after each (from ~line 263/205 onward). This is the likely source of the stale error colours above; delete the superseded block from both files. — auto-continue *(resolved 2026-08-03)*
 - [x] **`loadAccountStats()` is a half-wired stub that duplicates info already shown** — `templates/index.html:515-522` contains the comment `// This would need a new API endpoint, for now just show basic info` and just writes `Platform: ${platform}`, which duplicates the platform badge already rendered at line 503. Either wire it to real stats or remove the stub and its call site. — auto-continue *(resolved 2026-08-02)*
 - [x] **Controls-bar margin/radius differ between the two templates** — `templates/account.html:375,377`: `.controls { margin-bottom: 10px; border-radius: 6px; }` vs `templates/index.html:296,300`: `.control-panel { margin-bottom: 12px; border-radius: 7px; }`. Same "action bar" role, unify the values. — auto-continue *(resolved 2026-08-02)*
@@ -33,7 +33,3 @@
   metadata and credential setup. *(resolved 2026-06-12)*
 - [x] **Monolith lacked provider isolation** — split source logic into
   `connectors/` and generic plumbing into `core/`. *(resolved 2026-06-06)*
-
-## Needs input (Auto Continue)
-*Left by Auto Continue 2026-08-17 — decide these, then clear CONSIDERATIONS.md.*
-- Secondary nav link styling disagreements exist between `templates/account.html:319-323` (neutral/transparent "← Back to Dashboard") and `templates/index.html:311-221` (indigo/primary "View Posts"). Two different "key stats" layouts for the same content are used in `templates/account.html:353-359` (`stats-bar`, borderless flex row) and `templates/index.html:261-268` (`stats-grid`, bordered grid). Decorative emoji used in headings on `templates/index.html` (📚/🚀/📁, lines 427/451/458) are not present in `templates/account.html`. A decision is needed on which secondary-link style is correct and whether to keep or remove the decorative emoji.

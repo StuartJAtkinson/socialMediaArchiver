@@ -18,23 +18,23 @@
       <p>Archive and view your social media posts locally. Pick a stage to get started.</p>
     </div>
 
-    <!-- Summary tiles -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-px mb-5 panel" style="background:var(--border)">
-      <div class="stat-tile">
-        <h3>ACCOUNTS</h3>
-        <div class="number" x-text="stats.total_accounts ?? '—'"></div>
+    <!-- Key stats — same borderless row as account/browse. -->
+    <div class="stats-bar mb-5">
+      <div class="stat-item">
+        <span class="label">Accounts</span>
+        <span class="value" x-text="stats.total_accounts ?? '—'"></span>
       </div>
-      <div class="stat-tile">
-        <h3>TOTAL POSTS</h3>
-        <div class="number" x-text="stats.total_posts ?? '—'"></div>
+      <div class="stat-item">
+        <span class="label">Total Posts</span>
+        <span class="value" x-text="stats.total_posts ?? '—'"></span>
       </div>
-      <div class="stat-tile">
-        <h3>IMAGES</h3>
-        <div class="number" x-text="stats.total_images ?? '—'"></div>
+      <div class="stat-item">
+        <span class="label">Images</span>
+        <span class="value" x-text="stats.total_images ?? '—'"></span>
       </div>
-      <div class="stat-tile">
-        <h3>VIDEOS</h3>
-        <div class="number" x-text="stats.total_videos ?? '—'"></div>
+      <div class="stat-item">
+        <span class="label">Videos</span>
+        <span class="value" x-text="stats.total_videos ?? '—'"></span>
       </div>
     </div>
 
