@@ -200,3 +200,8 @@ See [QUICKSTART.md](QUICKSTART.md), [ARCHITECTURE.md](ARCHITECTURE.md),
 Archive only content you are permitted to access and retain. Respect platform
 terms, robots policies, privacy rights, copyright, and rate limits. Public
 endpoints and unofficial providers can disappear without notice.
+
+## MCP
+
+No MCP server yet. [MCP.md](MCP.md) specs the one this repo should have — the
+tools, what backs each, and what deliberately stays out of an agent's reach.
