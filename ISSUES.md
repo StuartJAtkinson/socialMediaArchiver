@@ -2,6 +2,10 @@
 
 ## Open
 
+- [ ] **Secondary-link styling disagrees between templates** — decided: neutral is correct, `account.html` is right. Drop "View Posts" (`templates/index.html:311-321`) from the indigo/primary treatment to the neutral/transparent style `account.html:319-323` uses, so "Start Archiving" is the only filled button on the page. *(answered 2026-08-23)*
+- [ ] **Two "key stats" layouts for the same counts** — decided: borderless row everywhere. `templates/index.html:261-268`'s bordered `.stats-grid` becomes the `.stats-bar` flex row from `account.html:353-359`; the counts sit in the page rather than in a box. *(answered 2026-08-23)*
+- [ ] **Decorative emoji in `templates/index.html` headings** (📚/🚀/📁, lines 427/451/458) — decided: drop them. Plain headings on both templates; the archiver is a utility and the headings say what the section is without decoration. *(answered 2026-08-23)*
+
 
 ## Resolved
 - [x] **Dead legacy light-theme CSS block retained in both templates** — `templates/account.html:8-261` and `templates/index.html:8-203` are a full original light-theme stylesheet, entirely superseded by the dark-theme block appended after each (from ~line 263/205 onward). This is the likely source of the stale error colours above; delete the superseded block from both files. — auto-continue *(resolved 2026-08-03)*
