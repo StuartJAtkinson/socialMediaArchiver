@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ account }} - Social Media Archiver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/base.css" />
     <style>
         /* Page-specific styles only — the palette, body defaults, scrollbars
@@ -151,12 +152,15 @@
     </style>
 </head>
 <body>
+    {% with stage_actions = '' %}
+      {% include "_nav.html" %}
+    {% endwith %}
     <div class="container">
         <div class="header">
             <h1>@{{ account }} ({{ platform }})</h1>
-            <a href="/" class="back-btn">← Back to Dashboard</a>
+            <a href="/browse" class="back-btn">← Back to Browse</a>
         </div>
-        
+
         {% if stats.error %}
         <div class="error">
             Error loading account stats: {{ stats.error }}

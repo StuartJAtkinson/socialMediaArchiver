@@ -69,3 +69,16 @@ def test_dashboard_routes_render():
 
     assert client.get("/").status_code == 200
     assert client.get("/api/stats").status_code == 200
+
+
+def test_account_page_includes_shared_nav(tmp_path, monkeypatch):
+    monkeypatch.setattr(web, "OUTPUT_DIR", tmp_path)
+    _write_item(tmp_path, "twitter", "one")
+
+    client = web.app.test_client()
+    resp = client.get("/account/twitter/@example")
+
+    assert resp.status_code == 200
+    body = resp.get_data(as_text=True)
+    assert 'class="stage-nav' in body
+    assert 'href="/connect"' in body

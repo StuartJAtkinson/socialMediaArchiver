@@ -304,12 +304,16 @@ def view_account(platform, account):
     """View posts for a specific account."""
     stats = get_account_stats(platform, account)
     posts_data = get_posts(platform, account, limit=20, offset=0)
-    
-    return render_template('account.html', 
-                         platform=platform, 
+    ctx = _stage_context(active='browse')
+
+    return render_template('account.html',
+                         platform=platform,
                          account=account,
                          stats=stats,
-                         posts_data=posts_data)
+                         posts_data=posts_data,
+                         tabs=ctx['tabs'],
+                         active_label=ctx['active_label'],
+                         stage_actions=ctx['stage_actions'])
 
 @app.route('/api/posts/<platform>/<path:account>')
 def api_get_posts(platform, account):
