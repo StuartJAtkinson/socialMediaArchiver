@@ -126,6 +126,35 @@ class PostIndex:
             "limit": limit,
         }
 
+    def range_posts(
+        self, since: str = "", until: str = "", platform: str = "", account: str = ""
+    ) -> list[dict]:
+        """List posts in ``[since, until]`` (either side optional), oldest first."""
+        where = []
+        params: list = []
+        if since:
+            where.append("posted_at >= ?")
+            params.append(since)
+        if until:
+            where.append("posted_at <= ?")
+            params.append(until)
+        if platform:
+            where.append("platform = ?")
+            params.append(platform)
+        if account:
+            where.append("account = ?")
+            params.append(account)
+        clause = (" WHERE " + " AND ".join(where)) if where else ""
+        rows = self.conn.execute(
+            f"SELECT platform, post_id, account, posted_at, path FROM posts{clause} "
+            f"ORDER BY posted_at ASC",
+            params,
+        ).fetchall()
+        return [
+            {"platform": p, "post_id": pid, "account": a, "posted_at": ts or "", "path": path}
+            for p, pid, a, ts, path in rows
+        ]
+
     def search(
         self,
         query: str,

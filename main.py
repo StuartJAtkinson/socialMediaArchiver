@@ -7,6 +7,7 @@ Subcommands:
   resume           Clear the checkpoint and start fresh next run.
   reindex          Rebuild index.db from the normalized JSON output alone.
   search QUERY     Full-text search over archived post text.
+  export           Export a date range as a static, self-contained HTML bundle.
 
 Replaces the old single-purpose ``scraper.py`` main. Generic plumbing now lives in
 ``core/`` and each source is a connector under ``connectors/``.
@@ -25,6 +26,7 @@ import yaml
 
 from core.checkpoint import Checkpoint
 from core import orchestrator
+from core.export import export_range
 from core.index import PostIndex, index_path
 from core.index import rebuild as rebuild_index
 from core.run_history import RunHistory, run_history_path
@@ -105,6 +107,23 @@ def cmd_reindex(cfg: dict) -> None:
     logger.info("Rebuilt index at %s (%d posts).", Path(output_dir) / "index.db", count)
 
 
+def cmd_export(cfg: dict, args: argparse.Namespace) -> None:
+    """Export a date range as a static, self-contained HTML bundle."""
+    if not args.output:
+        logger.error("export requires --output DIR")
+        sys.exit(1)
+    output_dir = (cfg.get("storage", {}) or {}).get("output_dir", cfg.get("output_dir", "./output"))
+    index_file = export_range(
+        output_dir,
+        args.output,
+        since=args.since or "",
+        until=args.until or "",
+        platform=args.platform or "",
+        account=args.account or "",
+    )
+    logger.info("Exported archive bundle to %s", index_file)
+
+
 def cmd_search(cfg: dict, args: argparse.Namespace) -> None:
     """Full-text search over archived post text via index.db's FTS5 table."""
     if not args.query:
@@ -153,16 +172,17 @@ def main() -> None:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("command", nargs="?", default="crawl",
-                        choices=["crawl", "status", "resume", "reindex", "search"],
+                        choices=["crawl", "status", "resume", "reindex", "search", "export"],
                         help="What to do (default: crawl).")
     parser.add_argument("query", nargs="?", default="",
                         help="Search text (only used by the 'search' command).")
     parser.add_argument("--config", default="config/config.yaml")
     parser.add_argument("--targets", default="config/targets.yaml")
-    parser.add_argument("--platform", help="Filter search results by platform.")
-    parser.add_argument("--account", help="Filter search results by account.")
-    parser.add_argument("--since", help="Filter search results to posted_at >= this ISO date.")
-    parser.add_argument("--until", help="Filter search results to posted_at <= this ISO date.")
+    parser.add_argument("--platform", help="Filter search/export results by platform.")
+    parser.add_argument("--account", help="Filter search/export results by account.")
+    parser.add_argument("--since", help="Filter search/export results to posted_at >= this ISO date.")
+    parser.add_argument("--until", help="Filter search/export results to posted_at <= this ISO date.")
+    parser.add_argument("--output", help="Destination directory for 'export' (created if missing).")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--log-file")
@@ -195,6 +215,8 @@ def main() -> None:
         cmd_reindex(cfg)
     elif args.command == "search":
         cmd_search(cfg, args)
+    elif args.command == "export":
+        cmd_export(cfg, args)
     else:
         cmd_crawl(cfg, args.targets)
 

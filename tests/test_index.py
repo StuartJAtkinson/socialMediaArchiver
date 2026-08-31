@@ -81,3 +81,17 @@ def test_rebuild_matches_filesystem(tmp_path):
         assert idx.accounts() == [{"platform": "twitter", "account": "@example", "post_count": 1}]
     finally:
         idx.close()
+
+
+def test_range_posts_filters_by_date_and_platform(tmp_path):
+    idx = PostIndex(index_path(tmp_path))
+    idx.record(_item("one", timestamp="2026-01-01"), path="a")
+    idx.record(_item("two", timestamp="2026-02-01"), path="b")
+    idx.record(_item("three", timestamp="2026-03-01"), path="c")
+
+    rows = idx.range_posts(since="2026-01-15", until="2026-02-15")
+    assert [r["post_id"] for r in rows] == ["two"]
+
+    assert len(idx.range_posts()) == 3
+    assert len(idx.range_posts(platform="reddit")) == 0
+    idx.close()
