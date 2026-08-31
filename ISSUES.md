@@ -1,8 +1,8 @@
 # Issues
 
 ## Open
-
-
+- [ ] **`account.html` is the only page missing the shared tab nav** — every other template (`index.html`, all of `templates/stages/*.html`) includes `{% include "_nav.html" %}` for the tab strip added in the staged-tabs refactor (deb7d74); `templates/account.html` still has its own standalone `.header` with a hand-rolled "← Back to Dashboard" link instead. From the account page there's no way to reach Connect/Configure/Storage/Schedule/Run without using the browser back button. Fix: wire `account.html` into `_stage_context`/`_nav.html` like the other stage routes (`web.py:254` `view_account`), matching the pattern used by `stage_browse`/`stage_run`/etc.
+- [ ] **`account.html`'s `<title>` uses a plain hyphen instead of the em dash every other page uses** — `templates/account.html:6` renders `{{ account }} - Social Media Archiver`, while `index.html` and every `templates/stages/*.html` use `Page — Social Media Archiver` (em dash). Fix: change the separator in `account.html`'s `<title>` to `—` for consistency.
 
 ## Resolved
 - [x] **Secondary-link styling disagrees between templates** — decided: neutral is correct. Already delivered by the staged-tab refactor (deb7d74): the indigo "View Posts" CTA no longer exists and `account.html`'s `.back-btn` is the only secondary link, on the neutral/transparent style. Verified 2026-08-23 — no `indigo` classes remain in `templates/`. *(resolved 2026-08-23)*
