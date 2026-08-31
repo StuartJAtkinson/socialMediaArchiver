@@ -6,17 +6,21 @@ optional S3-compatible mirroring.
 ## Complete
 
 - [x] Normalized `Item` model and connector/provider architecture
-- [x] YouTube Community, Twitter/Nitter, Reddit, RSS, and Facebook Graph API
+- [x] YouTube Community, Twitter/Nitter, Reddit, RSS, Facebook Graph API, and
+      Mastodon connectors
 - [x] Checkpoint/resume, rate limiting, date filters, media and comments
 - [x] Dashboard over normalized `output/`
 - [x] Dashboard-triggered orchestrator crawl
 - [x] Legacy `src/`, JSON config, and duplicate entry point removed
 - [x] Facebook browser tiers removed in favor of the stable official API
-- [x] Filesystem storage and optional S3-compatible mirror
+- [x] Filesystem storage, optional S3-compatible mirror, and native GCS/Azure
+      Blob backends
 - [x] Compact Homelab Designer-inspired dark dashboard
 - [x] Automated regression tests
 - [x] SQLite `index.db` for fast Browse/account paging, rebuildable via
       `python main.py reindex`
+- [x] Full-text search (FTS5) over archived post text, in the dashboard and
+      via `python main.py search`
 
 ## Operational requirements
 
@@ -24,7 +28,9 @@ optional S3-compatible mirroring.
 - Network access for configured sources
 - `FB_GRAPH_TOKEN` for Facebook
 - Reddit credentials for full Reddit metadata/comments; RSS fallback otherwise
-- `boto3` plus cloud credentials only when `storage.backend: s3`
+- `MASTODON_TOKEN` optional, only needed for followers-only Mastodon accounts
+- `boto3`/GCS/Azure SDKs plus cloud credentials only when `storage.backend` is
+  set to that provider
 
 ## Known limitations
 

@@ -69,10 +69,12 @@ thread.
 $env:REDDIT_CLIENT_ID="..."
 $env:REDDIT_CLIENT_SECRET="..."
 $env:FB_GRAPH_TOKEN="..."
+$env:MASTODON_TOKEN="..."
 ```
 
 Reddit falls back to public RSS without credentials. Facebook does not use a
-browser fallback and requires an authorized Graph API token.
+browser fallback and requires an authorized Graph API token. Mastodon needs no
+token for public accounts; set one only for followers-only accounts.
 
 ## Test
 

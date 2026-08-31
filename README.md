@@ -14,6 +14,7 @@ archive.
 | Reddit | PRAW, falling back to public RSS |
 | RSS/Atom | `feedparser` |
 | Facebook Pages | Official Graph API; `FB_GRAPH_TOKEN` required |
+| Mastodon | Public instance REST API; token optional for followers-only accounts |
 
 Facebook browser scraping is intentionally unsupported: the DOM is unstable,
 saved sessions are sensitive credentials, and automated scraping can violate
@@ -41,11 +42,14 @@ python main.py crawl    [--config FILE] [--targets FILE] [--verbose]
 python main.py status   [--config FILE]
 python main.py resume   [--config FILE]
 python main.py reindex  [--config FILE]
+python main.py search "<query>" [--platform P] [--account A] [--since DATE] [--until DATE]
 ```
 
 `resume` clears the checkpoint so the next crawl starts from the beginning.
 `reindex` rebuilds `index.db` from the normalized JSON output alone — use it
 if the index is ever deleted or falls out of sync.
+`search` runs a full-text query over archived post text via `index.db`'s FTS5
+table, with optional platform/account/date filters.
 The dashboard’s **Start Archiving** button invokes the same orchestrator.
 
 ## Configuration

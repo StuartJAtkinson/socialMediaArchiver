@@ -24,26 +24,24 @@ pair rather than a blocking tool.
 
 | Tool | Params | Returns | Backs onto |
 |---|---|---|---|
-| `list_accounts` | `platform?` | archived accounts with counts | `GET /api/stats`, `web.py:604` |
+| `list_accounts` | `platform?` | archived accounts with counts | `GET /api/stats`, `web.py:635` |
 | `get_stats` | — | totals: accounts, posts, images, videos | `GET /api/stats` |
-| `list_posts` | `platform`, `account`, `limit?`, `offset?` | normalised posts | `GET /api/posts/<platform>/<account>`, `web.py:315` |
-| `search_posts` | `query`, `platform?`, `account?`, `since?`, `until?` | matching posts | **not yet backed** — see below |
-| `get_run_history` | `limit?` | past crawl runs with status | `GET /api/run/history`, `web.py:351` |
+| `list_posts` | `platform`, `account`, `limit?`, `offset?` | normalised posts | `GET /api/posts/<platform>/<account>`, `web.py:318` |
+| `search_posts` | `query`, `platform?`, `account?`, `since?`, `until?` | matching posts | `GET /api/search`, `web.py:330` |
+| `get_run_history` | `limit?` | past crawl runs with status | `GET /api/run/history`, `web.py:382` |
 
-`search_posts` is the one tool with nothing behind it today. `list_accounts`
-and `list_posts` now read from the SQLite `index.db` (`core/index.py`) instead
-of walking the filesystem, but the index only supports lookup by
-platform/account/id — there's no text search over it yet. `search_posts`
-should wait on the **full-text search** roadmap item, which adds an FTS5
-virtual table over this same index.
+`list_accounts`, `list_posts`, and `search_posts` all read from the SQLite
+`index.db` (`core/index.py`) instead of walking the filesystem. `search_posts`
+now has a backing route: `GET /api/search` runs the FTS5 virtual table added
+by the full-text search roadmap item.
 
 ## Tools — running a crawl
 
 | Tool | Params | Returns | Backs onto |
 |---|---|---|---|
-| `start_run` | `targets?` | run id | `POST /api/run/start`, `web.py:368` |
-| `run_status` | — | current run's progress | `GET /api/run/status`, `web.py:377` |
-| `list_targets` | — | configured archive targets | `GET /api/config/targets`, `web.py:438` |
+| `start_run` | `targets?` | run id | `POST /api/run/start`, `web.py:399` |
+| `run_status` | — | current run's progress | `GET /api/run/status`, `web.py:408` |
+| `list_targets` | — | configured archive targets | `GET /api/config/targets`, `web.py:469` |
 
 **Start/poll, never block.** A crawl runs for minutes to hours; a tool that
 waits for it will time out and leave the run orphaned. `start_run` returns
@@ -59,13 +57,13 @@ immediately and `run_status` is the poll.
 
 ## What must NOT be a tool
 
-- **Credential entry.** `POST /api/config/sources` (`web.py:572`) takes
+- **Credential entry.** `POST /api/config/sources` (`web.py:604`) takes
   connector credentials. Those are entered by a human on the Connect stage at
   `http://localhost:5000/connect`. No MCP tool should accept a token.
-- **Storage reconfiguration.** `POST /api/config/storage` (`web.py:512`) can
+- **Storage reconfiguration.** `POST /api/config/storage` (`web.py:544`) can
   repoint where the archive lives, including at an S3/GCS/Azure backend. An
   agent repointing storage mid-corpus is a data-loss shape, not a feature.
-- **Target removal.** `POST /api/config/targets/remove` (`web.py:472`) — adding
+- **Target removal.** `POST /api/config/targets/remove` (`web.py:504`) — adding
   a target is cheap and reversible; removing one silently drops an account from
   future crawls. Leave it to the UI.
 

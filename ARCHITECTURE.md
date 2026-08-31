@@ -53,6 +53,7 @@ Current connectors:
 - Reddit through PRAW or public RSS
 - RSS/Atom
 - Facebook through the official Graph API
+- Mastodon through the public instance REST API
 
 ## Storage schema
 
@@ -80,6 +81,7 @@ adapts `Item` fields to the post-card view, and exposes:
 - `/account/<source>/<target>`
 - `/api/stats`
 - `/api/posts/<source>/<target>`
+- `/api/search`
 - `/api/archive/start`
 - `/api/archive/status`
 - `/api/archive/history`
