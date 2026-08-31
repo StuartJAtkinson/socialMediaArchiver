@@ -40,6 +40,29 @@
       </div>
     </div>
 
+    <div class="panel p-4 mb-5">
+      <h2 class="text-sm font-semibold text-white mb-2">Search</h2>
+      <div class="flex gap-2">
+        <input type="text" class="field-input" placeholder="Search archived post text…"
+               x-model="query" @keyup.enter="search()" style="max-width:360px" />
+        <button @click="search()"
+                style="color:var(--accent-fg);background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;">
+          Search
+        </button>
+      </div>
+      <template x-if="searched && !searching">
+        <p class="text-xs mt-2" style="color:var(--faint)" x-text="results.length + ' of ' + searchTotal + ' match(es)'"></p>
+      </template>
+      <div class="mt-2 space-y-1.5" x-show="results.length > 0">
+        <template x-for="r in results" :key="r.platform + ':' + r.post_id">
+          <a :href="'/account/' + r.platform + '/' + r.account" class="block panel-band p-2 text-xs" style="text-decoration:none;color:var(--text)">
+            <span style="color:var(--faint)" x-text="'[' + r.platform + '] @' + r.account + '  ' + (r.posted_at || '')"></span>
+            <div x-text="r.snippet"></div>
+          </a>
+        </template>
+      </div>
+    </div>
+
     <h2 class="text-sm font-semibold text-white mb-2">Archived accounts</h2>
     <div id="accounts-container">
       <template x-if="loading">

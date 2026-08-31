@@ -42,6 +42,31 @@ def test_record_upserts_on_same_platform_and_id(tmp_path):
     idx.close()
 
 
+def test_search_matches_text_and_respects_filters(tmp_path):
+    idx = PostIndex(index_path(tmp_path))
+    idx.record(_item("one", target="@a", timestamp="2026-01-01", text="the rocket launched today"))
+    idx.record(_item("two", target="@b", timestamp="2026-02-01", text="a quiet news day"))
+
+    hit = idx.search("rocket")
+    assert hit["total"] == 1
+    assert hit["results"][0]["post_id"] == "one"
+    assert "rocket" in hit["results"][0]["snippet"].lower()
+
+    assert idx.search("rocket", account="@b")["total"] == 0
+    assert idx.search("rocket", since="2026-06-01")["total"] == 0
+    assert idx.search("day")["total"] == 1
+    idx.close()
+
+
+def test_search_upsert_replaces_old_text(tmp_path):
+    idx = PostIndex(index_path(tmp_path))
+    idx.record(_item("one", text="original wording"))
+    idx.record(_item("one", text="updated wording"))
+    assert idx.search("original")["total"] == 0
+    assert idx.search("updated")["total"] == 1
+    idx.close()
+
+
 def test_rebuild_matches_filesystem(tmp_path):
     out = tmp_path / "twitter"
     out.mkdir()

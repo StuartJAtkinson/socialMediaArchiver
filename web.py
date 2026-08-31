@@ -327,6 +327,34 @@ def api_get_posts(platform, account):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/search')
+def api_search():
+    """Full-text search over archived post text, via index.db's FTS5 table."""
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({'results': [], 'total': 0, 'has_more': False})
+    idx = _index_if_present()
+    if idx is None:
+        return jsonify({
+            'results': [], 'total': 0, 'has_more': False,
+            'error': 'No index yet — run a crawl or `python main.py reindex`.',
+        })
+    try:
+        limit = int(request.args.get('limit', 20))
+        offset = int(request.args.get('offset', 0))
+        return jsonify(idx.search(
+            query,
+            platform=request.args.get('platform', ''),
+            account=request.args.get('account', ''),
+            since=request.args.get('since', ''),
+            until=request.args.get('until', ''),
+            limit=limit,
+            offset=offset,
+        ))
+    finally:
+        idx.close()
+
+
 @app.route('/api/archive/start', methods=['POST'])
 def api_start_archive():
     """Start archiving in background."""

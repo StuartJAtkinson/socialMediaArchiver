@@ -7,6 +7,11 @@ function page() {
     stats: {},
     accounts: [],
     loading: true,
+    query: '',
+    results: [],
+    searchTotal: 0,
+    searched: false,
+    searching: false,
     _timer: null,
     async init() {
       await this._sync();
@@ -21,6 +26,21 @@ function page() {
       } catch (err) {
         console.error('browse sync failed:', err);
         this.loading = false;
+      }
+    },
+    async search() {
+      const q = this.query.trim();
+      if (!q) { this.results = []; this.searched = false; return; }
+      this.searching = true;
+      try {
+        const data = await fetch('/api/search?q=' + encodeURIComponent(q)).then(r => r.json());
+        this.results = data.results || [];
+        this.searchTotal = data.total || 0;
+        this.searched = true;
+      } catch (err) {
+        console.error('search failed:', err);
+      } finally {
+        this.searching = false;
       }
     },
   };

@@ -26,6 +26,14 @@ CREATE TABLE IF NOT EXISTS posts (
     PRIMARY KEY (platform, post_id)
 );
 CREATE INDEX IF NOT EXISTS idx_posts_account ON posts(platform, account, posted_at);
+CREATE VIRTUAL TABLE IF NOT EXISTS posts_fts USING fts5(
+    text,
+    post_id UNINDEXED,
+    platform UNINDEXED,
+    account UNINDEXED,
+    posted_at UNINDEXED,
+    path UNINDEXED
+);
 """
 
 
@@ -52,6 +60,15 @@ class PostIndex:
             "account=excluded.account, posted_at=excluded.posted_at, text=excluded.text, "
             "media_count=excluded.media_count, path=excluded.path",
             (platform, post_id, account, posted_at, text, media_count, str(path)),
+        )
+        # FTS5 has no UPSERT; drop any previous row for this post, then reinsert.
+        self.conn.execute(
+            "DELETE FROM posts_fts WHERE post_id=? AND platform=?", (post_id, platform)
+        )
+        self.conn.execute(
+            "INSERT INTO posts_fts (text, post_id, platform, account, posted_at, path) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (text or "", post_id, platform, account, posted_at, str(path)),
         )
         self.conn.commit()
 
@@ -109,6 +126,65 @@ class PostIndex:
             "limit": limit,
         }
 
+    def search(
+        self,
+        query: str,
+        platform: str = "",
+        account: str = "",
+        since: str = "",
+        until: str = "",
+        limit: int = 50,
+        offset: int = 0,
+    ) -> dict:
+        """Full-text search over post text, newest first.
+
+        ``since``/``until`` compare lexically against ``posted_at`` (ISO 8601
+        sorts correctly as a string), so plain ``YYYY-MM-DD`` prefixes work.
+        """
+        where = ["posts_fts MATCH ?"]
+        params: list = [query]
+        if platform:
+            where.append("platform = ?")
+            params.append(platform)
+        if account:
+            where.append("account = ?")
+            params.append(account)
+        if since:
+            where.append("posted_at >= ?")
+            params.append(since)
+        if until:
+            where.append("posted_at <= ?")
+            params.append(until)
+        clause = " AND ".join(where)
+
+        total = self.conn.execute(
+            f"SELECT COUNT(*) FROM posts_fts WHERE {clause}", params
+        ).fetchone()[0]
+        rows = self.conn.execute(
+            f"SELECT post_id, platform, account, posted_at, path, "
+            f"snippet(posts_fts, 0, '[', ']', '...', 12) "
+            f"FROM posts_fts WHERE {clause} ORDER BY posted_at DESC LIMIT ? OFFSET ?",
+            params + [limit, offset],
+        ).fetchall()
+        results = [
+            {
+                "post_id": pid,
+                "platform": p,
+                "account": a,
+                "posted_at": ts or "",
+                "path": path,
+                "snippet": snippet,
+            }
+            for pid, p, a, ts, path, snippet in rows
+        ]
+        return {
+            "results": results,
+            "total": total,
+            "has_more": offset + limit < total,
+            "offset": offset,
+            "limit": limit,
+        }
+
     def close(self) -> None:
         self.conn.close()
 
@@ -122,6 +198,7 @@ def rebuild(output_dir) -> PostIndex:
     out = Path(output_dir)
     idx = PostIndex(index_path(out))
     idx.conn.execute("DELETE FROM posts")
+    idx.conn.execute("DELETE FROM posts_fts")
     idx.conn.commit()
     if out.is_dir():
         for source_dir in out.iterdir():

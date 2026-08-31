@@ -6,6 +6,7 @@ Subcommands:
   status           Print checkpoint status and exit.
   resume           Clear the checkpoint and start fresh next run.
   reindex          Rebuild index.db from the normalized JSON output alone.
+  search QUERY     Full-text search over archived post text.
 
 Replaces the old single-purpose ``scraper.py`` main. Generic plumbing now lives in
 ``core/`` and each source is a connector under ``connectors/``.
@@ -24,6 +25,7 @@ import yaml
 
 from core.checkpoint import Checkpoint
 from core import orchestrator
+from core.index import PostIndex, index_path
 from core.index import rebuild as rebuild_index
 from core.run_history import RunHistory, run_history_path
 
@@ -103,6 +105,30 @@ def cmd_reindex(cfg: dict) -> None:
     logger.info("Rebuilt index at %s (%d posts).", Path(output_dir) / "index.db", count)
 
 
+def cmd_search(cfg: dict, args: argparse.Namespace) -> None:
+    """Full-text search over archived post text via index.db's FTS5 table."""
+    if not args.query:
+        logger.error("search requires a query, e.g.: python main.py search \"launch\"")
+        sys.exit(1)
+    output_dir = (cfg.get("storage", {}) or {}).get("output_dir", cfg.get("output_dir", "./output"))
+    idx = PostIndex(index_path(output_dir))
+    try:
+        page = idx.search(
+            args.query,
+            platform=args.platform or "",
+            account=args.account or "",
+            since=args.since or "",
+            until=args.until or "",
+        )
+    finally:
+        idx.close()
+
+    print(f"--- {page['total']} match(es) for {args.query!r} ---")
+    for r in page["results"]:
+        print(f"[{r['platform']}] @{r['account']}  {r['posted_at']}  {r['post_id']}")
+        print(f"    {r['snippet']}")
+
+
 def cmd_crawl(cfg: dict, targets_path: str, trigger: str = "manual") -> dict[str, int]:
     targets = load_targets(targets_path)
     logger.info("Loaded %d target(s).", len(targets))
@@ -127,10 +153,16 @@ def main() -> None:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("command", nargs="?", default="crawl",
-                        choices=["crawl", "status", "resume", "reindex"],
+                        choices=["crawl", "status", "resume", "reindex", "search"],
                         help="What to do (default: crawl).")
+    parser.add_argument("query", nargs="?", default="",
+                        help="Search text (only used by the 'search' command).")
     parser.add_argument("--config", default="config/config.yaml")
     parser.add_argument("--targets", default="config/targets.yaml")
+    parser.add_argument("--platform", help="Filter search results by platform.")
+    parser.add_argument("--account", help="Filter search results by account.")
+    parser.add_argument("--since", help="Filter search results to posted_at >= this ISO date.")
+    parser.add_argument("--until", help="Filter search results to posted_at <= this ISO date.")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--log-file")
@@ -161,6 +193,8 @@ def main() -> None:
         cmd_resume(cfg)
     elif args.command == "reindex":
         cmd_reindex(cfg)
+    elif args.command == "search":
+        cmd_search(cfg, args)
     else:
         cmd_crawl(cfg, args.targets)
 

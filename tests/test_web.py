@@ -71,6 +71,32 @@ def test_dashboard_routes_render():
     assert client.get("/api/stats").status_code == 200
 
 
+def test_api_search_uses_index_when_present(tmp_path, monkeypatch):
+    from core.index import PostIndex, index_path
+    from core.models import Item
+
+    monkeypatch.setattr(web, "OUTPUT_DIR", tmp_path)
+    idx = PostIndex(index_path(tmp_path))
+    idx.record(Item(id="one", source="twitter", target="@example", timestamp="2026-01-01",
+                     text="the rocket launched today"))
+    idx.close()
+
+    client = web.app.test_client()
+    resp = client.get("/api/search?q=rocket")
+    data = resp.get_json()
+
+    assert resp.status_code == 200
+    assert data["total"] == 1
+    assert data["results"][0]["account"] == "@example"
+
+
+def test_api_search_without_query_is_empty(tmp_path, monkeypatch):
+    monkeypatch.setattr(web, "OUTPUT_DIR", tmp_path)
+    client = web.app.test_client()
+    data = client.get("/api/search").get_json()
+    assert data == {"results": [], "total": 0, "has_more": False}
+
+
 def test_account_page_includes_shared_nav(tmp_path, monkeypatch):
     monkeypatch.setattr(web, "OUTPUT_DIR", tmp_path)
     _write_item(tmp_path, "twitter", "one")
