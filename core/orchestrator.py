@@ -15,7 +15,7 @@ from typing import Any, Optional
 from core.checkpoint import Checkpoint
 from core.index import PostIndex, index_path
 from core.models import Item
-from core.ratelimit import RotationManager, sleep_with_jitter
+from core.ratelimit import RateLimitBackoff, RotationManager, backoff_path, sleep_with_jitter
 from core.registry import get_connector_class
 from core.storage import Storage, create_storage
 
@@ -89,6 +89,8 @@ def run(
         yaml_config.get("date_after", ""), yaml_config.get("date_before", ""), logger
     )
     rotation = RotationManager(yaml_config, logger)
+    backoff = RateLimitBackoff(backoff_path(storage.output_dir))
+    backoff_seconds = float(yaml_config.get("rate_limit_backoff", 900) or 900)
     download_media = yaml_config.get("download_images", True)
     save_comments = yaml_config.get("download_comments", False)
     post_delay = yaml_config.get("post_delay", 2.0)
@@ -109,6 +111,15 @@ def run(
                 logger.info("Target '%s' already processed. Skipping.", target_key)
                 continue
 
+            cooldown = backoff.active(source)
+            if cooldown > 0:
+                logger.info(
+                    "Source '%s' is rate-limit backed off for another %.0fs; "
+                    "skipping target '%s' this run.",
+                    source, cooldown, target_key,
+                )
+                continue
+
             logger.info("Processing target: %s", target_key)
             try:
                 connector_cls = get_connector_class(source)
@@ -118,6 +129,9 @@ def run(
                 continue
 
             connector = connector_cls(_source_config(yaml_config, source), logger)
+            connector.on_rate_limit = lambda e, src=source: backoff.record(
+                src, e.retry_after or backoff_seconds
+            )
             try:
                 _process_target(
                     connector,

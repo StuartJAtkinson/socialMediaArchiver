@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Iterator
+from typing import Callable, Iterator, Optional
 
 from core.errors import AuthError, ProviderUnavailable, RateLimitError
 from core.models import Item
@@ -52,6 +52,9 @@ class Connector(ABC):
         self.config = config
         self.logger = logger
         self._providers: list[Provider] | None = None
+        # Set by the orchestrator to persist a cooldown when rate-limited, so a
+        # scheduler's next run skips this source instead of hitting it again.
+        self.on_rate_limit: Optional[Callable[[RateLimitError], None]] = None
 
     @abstractmethod
     def build_providers(self) -> list[Provider]:
@@ -98,6 +101,8 @@ class Connector(ABC):
                     provider.name,
                     e,
                 )
+                if self.on_rate_limit:
+                    self.on_rate_limit(e)
             except AuthError as e:
                 last_error = e
                 self.logger.warning(

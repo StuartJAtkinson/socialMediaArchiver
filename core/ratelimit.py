@@ -6,9 +6,11 @@ same throttling and rotation behavior.
 
 from __future__ import annotations
 
+import json
 import logging
 import random
 import time
+from pathlib import Path
 from typing import Optional
 
 
@@ -50,6 +52,40 @@ def new_tor_circuit(
     except Exception as e:
         logger.warning("Could not rotate Tor circuit via port %d: %s", control_port, e)
         return False
+
+
+def backoff_path(output_dir) -> Path:
+    """Where the rate-limit backoff state lives — beside the checkpoint/index."""
+    return Path(output_dir) / ".rate_backoff.json"
+
+
+class RateLimitBackoff:
+    """Per-source rate-limit cooldown, persisted to disk.
+
+    A scheduler runs the crawl repeatedly as a fresh process each time,
+    so an in-memory cooldown wouldn't survive between runs and a source that
+    just got rate-limited would be hit again on the very next scheduled run.
+    Persisting the cooldown here makes it shared across those runs.
+    """
+
+    def __init__(self, path):
+        self.path = Path(path)
+        self._until: dict[str, float] = {}
+        if self.path.exists():
+            try:
+                self._until = json.loads(self.path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                self._until = {}
+
+    def record(self, source: str, cooldown_seconds: float) -> None:
+        """Remember that ``source`` should be skipped for ``cooldown_seconds``."""
+        self._until[source] = time.time() + max(0.0, cooldown_seconds)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text(json.dumps(self._until), encoding="utf-8")
+
+    def active(self, source: str) -> float:
+        """Seconds remaining in ``source``'s cooldown, or 0 if none/expired."""
+        return max(0.0, self._until.get(source, 0.0) - time.time())
 
 
 class RotationManager:
