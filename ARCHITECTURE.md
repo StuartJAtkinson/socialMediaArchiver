@@ -20,7 +20,8 @@ core.orchestrator
        normalized Item JSON
              │
              ├── filesystem cache
-             └── optional S3-compatible, GCS, or Azure Blob mirror
+             ├── optional S3-compatible, GCS, or Azure Blob mirror
+             └── index.db (SQLite, upserted per item)
                          │
                          ▼
                     Flask dashboard
@@ -34,6 +35,8 @@ core.orchestrator
 - `core/checkpoint.py`: resumable item and target state
 - `core/ratelimit.py`: delay and proxy rotation
 - `core/storage.py`: filesystem, S3-mirrored, GCS-mirrored, and Azure Blob-mirrored storage
+- `core/index.py`: SQLite `index.db` of every post, upserted per item and
+  rebuildable from the normalized JSON with `python main.py reindex`
 - `core/feeds.py`: shared RSS parsing
 
 ## Connector contract
@@ -60,6 +63,13 @@ by `media[].local_path`.
 The S3, GCS, and Azure Blob backends mirror these relative keys beneath an
 optional prefix while retaining local files. This keeps dashboard behavior
 identical across backends.
+
+Alongside these, `output/index.db` holds one row per post — `post_id`,
+`account`, `platform`, `posted_at`, `text`, `media_count`, `path` — upserted by
+the orchestrator as each item lands. It's a derived index, not a second source
+of truth: `python main.py reindex` rebuilds it from the JSON records alone.
+The dashboard reads counts and paging from it when present, falling back to
+walking `output/` if it's missing.
 
 ## Dashboard
 

@@ -15,6 +15,8 @@ optional S3-compatible mirroring.
 - [x] Filesystem storage and optional S3-compatible mirror
 - [x] Compact Homelab Designer-inspired dark dashboard
 - [x] Automated regression tests
+- [x] SQLite `index.db` for fast Browse/account paging, rebuildable via
+      `python main.py reindex`
 
 ## Operational requirements
 
@@ -40,4 +42,4 @@ python main.py --help
 python web.py
 ```
 
-Last refreshed: 2026-07-24.
+Last refreshed: 2026-08-31.

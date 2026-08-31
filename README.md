@@ -37,12 +37,15 @@ On Linux/macOS, activate with `. .venv/bin/activate`. `python setup.py`,
 ## CLI
 
 ```text
-python main.py crawl   [--config FILE] [--targets FILE] [--verbose]
-python main.py status  [--config FILE]
-python main.py resume  [--config FILE]
+python main.py crawl    [--config FILE] [--targets FILE] [--verbose]
+python main.py status   [--config FILE]
+python main.py resume   [--config FILE]
+python main.py reindex  [--config FILE]
 ```
 
 `resume` clears the checkpoint so the next crawl starts from the beginning.
+`reindex` rebuilds `index.db` from the normalized JSON output alone — use it
+if the index is ever deleted or falls out of sync.
 The dashboard’s **Start Archiving** button invokes the same orchestrator.
 
 ## Configuration
@@ -58,11 +61,19 @@ Output defaults to:
 output/
 ├── .checkpoint.json
 ├── .run_history.json
+├── index.db
 ├── images/
 └── <source>/
     ├── <id>.json
     └── <id>_comments.json
 ```
+
+`index.db` is a SQLite index over every post (`post_id`, `account`, `platform`,
+`posted_at`, `text`, `media_count`, `path`), written as each post lands. Browse
+and the account page read counts and paging from it instead of walking
+`output/` directly, which is what keeps them fast past a few thousand posts.
+It's a derived convenience file, not a second source of truth — rebuild it any
+time with `python main.py reindex`.
 
 ### Scheduled crawls and run history
 
@@ -167,7 +178,8 @@ main.py → core/orchestrator.py → connectors/<source>.py
                   │
                   ├─ checkpoint / rate limiting
                   ├─ normalized Item model
-                  └─ filesystem, S3, GCS, or Azure Blob-mirrored storage
+                  ├─ filesystem, S3, GCS, or Azure Blob-mirrored storage
+                  └─ index.db (SQLite, rebuildable via `main.py reindex`)
                                       │
                                       ▼
                                   output/

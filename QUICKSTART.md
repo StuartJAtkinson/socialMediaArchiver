@@ -46,6 +46,13 @@ python main.py resume
 python main.py crawl --verbose
 ```
 
+If `output/index.db` (used for fast Browse paging) is ever deleted or falls
+out of sync, rebuild it from the archived JSON alone:
+
+```powershell
+python main.py reindex
+```
+
 ## Browse
 
 ```powershell
