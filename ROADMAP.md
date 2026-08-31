@@ -39,7 +39,7 @@ tractable, and search is what makes a large archive worth adding sources to.
       index above, a search box on Browse, and `main.py search "<query>"` for
       the CLI. Filter by platform, account and date range; results link to the
       post in the account view. No external search service.
-- [ ] Mastodon connector — public timeline via the instance API
+- [x] Mastodon connector — public timeline via the instance API
       (`/api/v1/accounts/:id/statuses`), no auth needed for public accounts;
       token optional for followers-only posts. Normalizes to the same post
       shape as the others, including boosts and media attachments. Mirrors
