@@ -29,7 +29,7 @@ Ordered so each item unblocks the one under it: the index is what makes search
 tractable, and search is what makes a large archive worth adding sources to.
 
 - [x] Scheduled crawls with persisted run history
-- [ ] SQLite index for large archives — one `index.db` beside the archive
+- [x] SQLite index for large archives — one `index.db` beside the archive
       holding `(post_id, account, platform, posted_at, text, media_count,
       path)`, written by the orchestrator as each post lands, rebuildable from
       the normalized output alone (`python main.py reindex`). Browse and the
