@@ -108,3 +108,27 @@ def test_account_page_includes_shared_nav(tmp_path, monkeypatch):
     body = resp.get_data(as_text=True)
     assert 'class="stage-nav' in body
     assert 'href="/connect"' in body
+
+
+def test_auth_disabled_by_default(monkeypatch):
+    monkeypatch.setattr(web, 'DASHBOARD_USERNAME', '')
+    monkeypatch.setattr(web, 'DASHBOARD_PASSWORD', '')
+    client = web.app.test_client()
+    assert client.get('/api/stats').status_code == 200
+
+
+def test_auth_required_when_credentials_set(monkeypatch):
+    monkeypatch.setattr(web, 'DASHBOARD_USERNAME', 'admin')
+    monkeypatch.setattr(web, 'DASHBOARD_PASSWORD', 'secret')
+    client = web.app.test_client()
+
+    assert client.get('/api/stats').status_code == 401
+
+    import base64
+    creds = base64.b64encode(b'admin:secret').decode()
+    resp = client.get('/api/stats', headers={'Authorization': f'Basic {creds}'})
+    assert resp.status_code == 200
+
+    bad_creds = base64.b64encode(b'admin:wrong').decode()
+    resp = client.get('/api/stats', headers={'Authorization': f'Basic {bad_creds}'})
+    assert resp.status_code == 401

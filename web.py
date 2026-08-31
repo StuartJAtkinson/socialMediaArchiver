@@ -7,12 +7,13 @@ Provides a user-friendly interface for:
 - Monitoring progress and statistics
 """
 
+import hmac
 import json
 import math
 import os
 import threading
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, Response
 
 import main as crawler_cli
 from core.index import PostIndex, index_path
@@ -25,6 +26,28 @@ except ImportError:
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SECRET_KEY'] = 'social-media-archiver-key'
+
+# HTTP Basic Auth, enabled only when both are set. Local/default use (no env
+# vars) is unaffected; set these before binding to a non-local interface.
+DASHBOARD_USERNAME = os.environ.get('DASHBOARD_USERNAME', '')
+DASHBOARD_PASSWORD = os.environ.get('DASHBOARD_PASSWORD', '')
+
+
+@app.before_request
+def _require_dashboard_auth():
+    if not (DASHBOARD_USERNAME and DASHBOARD_PASSWORD):
+        return None
+    auth = request.authorization
+    if (
+        auth
+        and hmac.compare_digest(auth.username or '', DASHBOARD_USERNAME)
+        and hmac.compare_digest(auth.password or '', DASHBOARD_PASSWORD)
+    ):
+        return None
+    return Response(
+        'Authentication required.', 401,
+        {'WWW-Authenticate': 'Basic realm="Social Media Archiver"'},
+    )
 
 # Tab order shown on every stage page (and the landing dashboard).
 TABS = [
