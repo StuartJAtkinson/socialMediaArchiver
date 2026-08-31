@@ -6,12 +6,16 @@ const HINTS = {
   rss: 'RSS / Atom feed reader. No credentials needed.',
   twitter: 'Twitter connector options. Token comes from env vars.',
   facebook: 'Facebook Graph API token. FB_GRAPH_TOKEN env var overrides this.',
+  mastodon: 'Public timelines need no credentials. Optional token (for followers-only accounts); MASTODON_TOKEN env var overrides this.',
+  bluesky: 'Public profiles need no credentials. Optional app password (for accounts blocked to anonymous reads); BLUESKY_IDENTIFIER/BLUESKY_APP_PASSWORD env vars override these.',
 };
 
 // Secrets are rendered as ***. Empty values stay editable as plain text.
 const SECRETS = {
   reddit:   ['client_secret'],
   facebook: ['graph_token'],
+  mastodon: ['token'],
+  bluesky:  ['app_password'],
 };
 
 function page() {
