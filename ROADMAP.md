@@ -47,7 +47,7 @@ tractable, and search is what makes a large archive worth adding sources to.
 - [x] Bluesky connector — AT Protocol `app.bsky.feed.getAuthorFeed` via an app
       password. Handles reposts, quote posts, and the blob CDN for media.
       Credentials through the same Connect stage as every other source.
-- [ ] Dashboard authentication for non-local deployment — the server binds
+- [x] Dashboard authentication for non-local deployment — the server binds
       `0.0.0.0:5000` today, so anything on the LAN can read the archive and the
       stored credentials. Single-user password with a signed session cookie,
       set at first run; a `--local-only` flag to bind `127.0.0.1` instead.
