@@ -45,8 +45,7 @@
       <div class="flex gap-2">
         <input type="text" class="field-input" placeholder="Search archived post text…"
                x-model="query" @keyup.enter="search()" style="max-width:360px" />
-        <button @click="search()"
-                style="color:var(--accent-fg);background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;">
+        <button @click="search()" class="stage-actions" style="cursor:pointer">
           Search
         </button>
       </div>
