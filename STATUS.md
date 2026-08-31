@@ -7,7 +7,7 @@ optional S3-compatible mirroring.
 
 - [x] Normalized `Item` model and connector/provider architecture
 - [x] YouTube Community, Twitter/Nitter, Reddit, RSS, Facebook Graph API, and
-      Mastodon connectors
+      Mastodon, and Bluesky connectors
 - [x] Checkpoint/resume, rate limiting, date filters, media and comments
 - [x] Dashboard over normalized `output/`
 - [x] Dashboard-triggered orchestrator crawl
@@ -29,6 +29,8 @@ optional S3-compatible mirroring.
 - `FB_GRAPH_TOKEN` for Facebook
 - Reddit credentials for full Reddit metadata/comments; RSS fallback otherwise
 - `MASTODON_TOKEN` optional, only needed for followers-only Mastodon accounts
+- `BLUESKY_IDENTIFIER`/`BLUESKY_APP_PASSWORD` optional, only needed for
+  accounts blocked to anonymous reads
 - `boto3`/GCS/Azure SDKs plus cloud credentials only when `storage.backend` is
   set to that provider
 

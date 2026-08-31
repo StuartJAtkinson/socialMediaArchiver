@@ -54,6 +54,7 @@ Current connectors:
 - RSS/Atom
 - Facebook through the official Graph API
 - Mastodon through the public instance REST API
+- Bluesky through the AT Protocol `app.bsky.feed.getAuthorFeed` endpoint
 
 ## Storage schema
 

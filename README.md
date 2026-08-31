@@ -15,6 +15,7 @@ archive.
 | RSS/Atom | `feedparser` |
 | Facebook Pages | Official Graph API; `FB_GRAPH_TOKEN` required |
 | Mastodon | Public instance REST API; token optional for followers-only accounts |
+| Bluesky | AT Protocol `app.bsky.feed.getAuthorFeed`; app password optional |
 
 Facebook browser scraping is intentionally unsupported: the DOM is unstable,
 saved sessions are sensitive credentials, and automated scraping can violate
