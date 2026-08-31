@@ -3,7 +3,7 @@
 function page() {
   return {
     rows: [],
-    sources: ['facebook', 'reddit', 'rss', 'twitter', 'youtube_community'],
+    sources: [],
     draft: { source: '', target: '' },
     busy: false,
     loading: true,
@@ -13,7 +13,15 @@ function page() {
       return this.draft.source.trim() !== '' && this.draft.target.trim() !== '';
     },
     async init() {
-      await this.reload();
+      await Promise.all([this.reload(), this.loadSources()]);
+    },
+    async loadSources() {
+      try {
+        const data = await fetch('/api/config/sources').then(r => r.json());
+        this.sources = data.available || [];
+      } catch (err) {
+        this.errorMsg = 'Failed to load sources: ' + err.message;
+      }
     },
     async reload() {
       try {

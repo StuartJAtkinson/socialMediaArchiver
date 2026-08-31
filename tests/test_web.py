@@ -174,3 +174,16 @@ def test_account_page_shows_non_twitter_metrics(tmp_path, monkeypatch):
     assert '❤️ 7' in body
     assert '🔄 3' in body
     assert '💬 2' in body
+
+
+def test_api_config_sources_available_includes_every_registered_connector():
+    client = web.app.test_client()
+    data = client.get('/api/config/sources').get_json()
+
+    # The Configure stage's source dropdown (static/js/configure.js) reads
+    # this list rather than hardcoding it, so every registered connector
+    # (including newly-added ones) must show up here.
+    assert set(data['available']) == {
+        'facebook', 'reddit', 'rss', 'twitter', 'youtube_community',
+        'mastodon', 'bluesky',
+    }
