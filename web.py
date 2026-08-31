@@ -614,6 +614,15 @@ _SOURCE_SECRETS = {
     "reddit":   ["client_secret"],
     "twitter":  [],  # currently no secrets in twitter block
     "facebook": ["graph_token"],
+    "mastodon": ["token"],
+    "bluesky":  ["app_password"],
+}
+
+# Editable fields for a source with no block yet in config.yaml, so its
+# Connect tab has something to fill in rather than an empty panel.
+_SOURCE_DEFAULTS = {
+    "mastodon": {"token": ""},
+    "bluesky": {"identifier": "", "app_password": ""},
 }
 
 
@@ -647,9 +656,13 @@ def api_config_sources():
     cfg = crawler_cli.load_yaml("config/config.yaml", required=False) or {}
     block = cfg.get("sources") or {}
     if request.method == 'GET':
+        available = registry.available_sources()
+        # Every available source gets a (possibly empty) editable block, so
+        # Connect can configure one that has no entry in config.yaml yet.
+        full_block = {source: block.get(source) or {} for source in available}
         return jsonify({
-            "sources": _mask_sources(block),
-            "available": registry.available_sources(),
+            "sources": _mask_sources(full_block),
+            "available": available,
         })
     body = request.get_json(silent=True) or {}
     new_block = body.get("sources")
