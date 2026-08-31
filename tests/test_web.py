@@ -132,3 +132,15 @@ def test_auth_required_when_credentials_set(monkeypatch):
     bad_creds = base64.b64encode(b'admin:wrong').decode()
     resp = client.get('/api/stats', headers={'Authorization': f'Basic {bad_creds}'})
     assert resp.status_code == 401
+
+
+def test_account_page_posts_have_anchor_ids_for_search_deep_links(tmp_path, monkeypatch):
+    monkeypatch.setattr(web, 'OUTPUT_DIR', tmp_path)
+    _write_item(tmp_path, 'twitter', 'one')
+
+    client = web.app.test_client()
+    resp = client.get('/account/twitter/@example')
+
+    assert resp.status_code == 200
+    body = resp.get_data(as_text=True)
+    assert 'id="post-one"' in body

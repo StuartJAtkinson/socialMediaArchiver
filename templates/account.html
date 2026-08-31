@@ -208,7 +208,7 @@
             </div>
             {% elif posts_data.posts %}
                 {% for post in posts_data.posts %}
-                <div class="post" data-post-id="{{ post.post_id }}">
+                <div class="post" id="post-{{ post.post_id }}" data-post-id="{{ post.post_id }}">
                     <div class="post-header">
                         <div class="post-date">
                             {{ post.created_at[:19].replace('T', ' ') if post.created_at else 'Unknown date' }}
@@ -301,6 +301,7 @@
         function createPostElement(post) {
             const postDiv = document.createElement('div');
             postDiv.className = 'post';
+            postDiv.id = 'post-' + post.post_id;
             postDiv.setAttribute('data-post-id', post.post_id);
             
             const dateStr = post.created_at ? post.created_at.substring(0, 19).replace('T', ' ') : 'Unknown date';
