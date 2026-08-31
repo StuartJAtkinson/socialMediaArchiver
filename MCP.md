@@ -70,10 +70,11 @@ immediately and `run_status` is the poll.
 ## Security note the spec has to carry
 
 The server binds `0.0.0.0:5000` today, so the dashboard and everything behind
-it is reachable from the LAN with no authentication — that is a live roadmap
-item ("Dashboard authentication for non-local deployment"). An MCP server
-talking to `localhost` inherits the same exposure. **Do the auth item before
-this one**, or at minimum bind the MCP-facing app to `127.0.0.1`.
+it is reachable from the LAN unless `DASHBOARD_USERNAME`/`DASHBOARD_PASSWORD`
+are set (optional HTTP Basic Auth over every route, added in `web.py`). An MCP
+server talking to `localhost` inherits the same exposure. **Set those env vars
+before exposing this beyond localhost**, or at minimum bind the MCP-facing app
+to `127.0.0.1`.
 
 ## Implementation note
 

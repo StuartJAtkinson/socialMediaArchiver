@@ -59,6 +59,8 @@ The dashboard’s **Start Archiving** button invokes the same orchestrator.
 - `config/targets.yaml`: `{source, target}` crawl list
 - Environment variables: secrets such as `FB_GRAPH_TOKEN`,
   `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, and standard AWS credentials
+- `DASHBOARD_USERNAME` / `DASHBOARD_PASSWORD`: optional HTTP Basic Auth for
+  the dashboard; set both before binding it to a non-local interface
 
 Output defaults to:
 

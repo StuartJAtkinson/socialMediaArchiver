@@ -6,7 +6,7 @@ optional S3-compatible mirroring.
 ## Complete
 
 - [x] Normalized `Item` model and connector/provider architecture
-- [x] YouTube Community, Twitter/Nitter, Reddit, RSS, Facebook Graph API, and
+- [x] YouTube Community, Twitter/Nitter, Reddit, RSS, Facebook Graph API,
       Mastodon, and Bluesky connectors
 - [x] Checkpoint/resume, rate limiting, date filters, media and comments
 - [x] Dashboard over normalized `output/`
@@ -21,6 +21,8 @@ optional S3-compatible mirroring.
       `python main.py reindex`
 - [x] Full-text search (FTS5) over archived post text, in the dashboard and
       via `python main.py search`
+- [x] Optional dashboard authentication (`DASHBOARD_USERNAME`/
+      `DASHBOARD_PASSWORD`) for non-local deployment
 
 ## Operational requirements
 
@@ -39,7 +41,8 @@ optional S3-compatible mirroring.
 - Nitter public instances can disappear; configure replacement instances.
 - YouTube Community exposes a finite recent backlog.
 - Facebook access is limited to Pages and permissions authorized by the token.
-- The Flask server is intended for local use and has no user authentication.
+- The Flask server has no authentication unless `DASHBOARD_USERNAME`/
+  `DASHBOARD_PASSWORD` are set (optional HTTP Basic Auth).
 - S3 is a mirror; dashboard reads remain local.
 
 ## Verification

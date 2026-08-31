@@ -100,6 +100,8 @@ runs while target completion resets for each new crawl.
 - S3 authentication uses boto3’s standard credential chain.
 - GCS authentication uses Google Application Default Credentials.
 - Azure Blob Storage uses a connection string kept in local configuration.
-- The dashboard is a local development service with no authentication; do not
-  expose it publicly without adding authentication, CSRF protection, and a
-  production WSGI server.
+- The dashboard has no authentication by default (fine for local use). Setting
+  `DASHBOARD_USERNAME`/`DASHBOARD_PASSWORD` gates every route behind HTTP
+  Basic Auth; set both before binding to a non-local interface. It still has
+  no CSRF protection and runs Flask's development server, not a production
+  WSGI server.
