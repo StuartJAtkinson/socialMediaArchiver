@@ -33,7 +33,9 @@ core.orchestrator
 - `core/registry.py`: lazy connector lookup
 - `core/orchestrator.py`: generic crawl loop
 - `core/checkpoint.py`: resumable item and target state
-- `core/ratelimit.py`: delay and proxy rotation
+- `core/ratelimit.py`: delay and proxy rotation, plus a per-source rate-limit
+  backoff persisted to `.rate_backoff.json` beside the archive so scheduled
+  runs share the cooldown instead of re-hitting a limited source
 - `core/storage.py`: filesystem, S3-mirrored, GCS-mirrored, and Azure Blob-mirrored storage
 - `core/index.py`: SQLite `index.db` of every post, upserted per item and
   rebuildable from the normalized JSON with `python main.py reindex`

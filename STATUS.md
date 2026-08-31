@@ -25,6 +25,8 @@ optional S3-compatible mirroring.
       `DASHBOARD_PASSWORD`) for non-local deployment
 - [x] Date-range export to a static, self-contained HTML bundle via
       `python main.py export`
+- [x] Per-source rate-limit backoff persisted to `.rate_backoff.json`, shared
+      across scheduled runs
 
 ## Operational requirements
 
