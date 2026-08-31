@@ -18,6 +18,7 @@ _REGISTRY: dict[str, str] = {
     "rss": "connectors.rss:RssConnector",
     "twitter": "connectors.twitter:TwitterConnector",
     "facebook": "connectors.facebook:FacebookConnector",
+    "mastodon": "connectors.mastodon:MastodonConnector",
 }
 
 
