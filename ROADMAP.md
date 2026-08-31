@@ -35,7 +35,7 @@ tractable, and search is what makes a large archive worth adding sources to.
       the normalized output alone (`python main.py reindex`). Browse and the
       account page read counts and paging from it instead of walking the
       filesystem, which is what makes them slow past a few thousand posts.
-- [ ] Full-text search across normalized archives — FTS5 virtual table over the
+- [x] Full-text search across normalized archives — FTS5 virtual table over the
       index above, a search box on Browse, and `main.py search "<query>"` for
       the CLI. Filter by platform, account and date range; results link to the
       post in the account view. No external search service.
