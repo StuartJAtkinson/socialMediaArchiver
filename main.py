@@ -5,6 +5,7 @@ Subcommands:
   crawl            Run the orchestrator over config/targets.yaml (default).
   status           Print checkpoint status and exit.
   resume           Clear the checkpoint and start fresh next run.
+  reindex          Rebuild index.db from the normalized JSON output alone.
 
 Replaces the old single-purpose ``scraper.py`` main. Generic plumbing now lives in
 ``core/`` and each source is a connector under ``connectors/``.
@@ -23,6 +24,7 @@ import yaml
 
 from core.checkpoint import Checkpoint
 from core import orchestrator
+from core.index import rebuild as rebuild_index
 from core.run_history import RunHistory, run_history_path
 
 logger = logging.getLogger("bytebytego")
@@ -92,6 +94,15 @@ def cmd_resume(cfg: dict) -> None:
         logger.info("No checkpoint at '%s'; nothing to clear.", path)
 
 
+def cmd_reindex(cfg: dict) -> None:
+    """Rebuild index.db from the normalized JSON output alone."""
+    output_dir = (cfg.get("storage", {}) or {}).get("output_dir", cfg.get("output_dir", "./output"))
+    idx = rebuild_index(output_dir)
+    count = sum(a["post_count"] for a in idx.accounts())
+    idx.close()
+    logger.info("Rebuilt index at %s (%d posts).", Path(output_dir) / "index.db", count)
+
+
 def cmd_crawl(cfg: dict, targets_path: str, trigger: str = "manual") -> dict[str, int]:
     targets = load_targets(targets_path)
     logger.info("Loaded %d target(s).", len(targets))
@@ -116,7 +127,7 @@ def main() -> None:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("command", nargs="?", default="crawl",
-                        choices=["crawl", "status", "resume"],
+                        choices=["crawl", "status", "resume", "reindex"],
                         help="What to do (default: crawl).")
     parser.add_argument("--config", default="config/config.yaml")
     parser.add_argument("--targets", default="config/targets.yaml")
@@ -148,6 +159,8 @@ def main() -> None:
         cmd_status(cfg)
     elif args.command == "resume":
         cmd_resume(cfg)
+    elif args.command == "reindex":
+        cmd_reindex(cfg)
     else:
         cmd_crawl(cfg, args.targets)
 

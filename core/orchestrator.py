@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 from core.checkpoint import Checkpoint
+from core.index import PostIndex, index_path
 from core.models import Item
 from core.ratelimit import RotationManager, sleep_with_jitter
 from core.registry import get_connector_class
@@ -83,6 +84,7 @@ def run(
 ) -> dict[str, int]:
     """Run the crawl over all targets. Returns a summary dict."""
     storage = create_storage(yaml_config, logger)
+    index = PostIndex(index_path(storage.output_dir))
     date_filter = make_date_filter(
         yaml_config.get("date_after", ""), yaml_config.get("date_before", ""), logger
     )
@@ -94,52 +96,56 @@ def run(
 
     totals = {"items": 0, "media": 0, "comments": 0, "errors": 0, "skipped": 0}
 
-    for idx, entry in enumerate(targets):
-        source = entry.get("source", "")
-        target = entry.get("target", "")
-        if not source or not target:
-            logger.warning("Skipping malformed target entry: %r", entry)
-            continue
+    try:
+        for idx, entry in enumerate(targets):
+            source = entry.get("source", "")
+            target = entry.get("target", "")
+            if not source or not target:
+                logger.warning("Skipping malformed target entry: %r", entry)
+                continue
 
-        target_key = f"{source}:{target}"
-        if checkpoint.is_target_done(target_key):
-            logger.info("Target '%s' already processed. Skipping.", target_key)
-            continue
+            target_key = f"{source}:{target}"
+            if checkpoint.is_target_done(target_key):
+                logger.info("Target '%s' already processed. Skipping.", target_key)
+                continue
 
-        logger.info("Processing target: %s", target_key)
-        try:
-            connector_cls = get_connector_class(source)
-        except ValueError as e:
-            logger.error("%s", e)
-            totals["errors"] += 1
-            continue
+            logger.info("Processing target: %s", target_key)
+            try:
+                connector_cls = get_connector_class(source)
+            except ValueError as e:
+                logger.error("%s", e)
+                totals["errors"] += 1
+                continue
 
-        connector = connector_cls(_source_config(yaml_config, source), logger)
-        try:
-            _process_target(
-                connector,
-                target,
-                logger,
-                checkpoint,
-                storage,
-                date_filter,
-                rotation,
-                download_media,
-                save_comments,
-                post_delay,
-                totals,
-            )
-        except Exception as e:
-            logger.error("Target '%s' failed: %s", target_key, e)
-            totals["errors"] += 1
-        finally:
-            connector.close()
+            connector = connector_cls(_source_config(yaml_config, source), logger)
+            try:
+                _process_target(
+                    connector,
+                    target,
+                    logger,
+                    checkpoint,
+                    storage,
+                    index,
+                    date_filter,
+                    rotation,
+                    download_media,
+                    save_comments,
+                    post_delay,
+                    totals,
+                )
+            except Exception as e:
+                logger.error("Target '%s' failed: %s", target_key, e)
+                totals["errors"] += 1
+            finally:
+                connector.close()
 
-        checkpoint.mark_target_done(target_key)
-        checkpoint.save()
+            checkpoint.mark_target_done(target_key)
+            checkpoint.save()
 
-        if target_delay > 0 and idx < len(targets) - 1:
-            sleep_with_jitter(target_delay, logger)
+            if target_delay > 0 and idx < len(targets) - 1:
+                sleep_with_jitter(target_delay, logger)
+    finally:
+        index.close()
 
     logger.info(
         "\n----------------------------------------\nSUMMARY:\n"
@@ -161,6 +167,7 @@ def _process_target(
     logger: logging.Logger,
     checkpoint: Checkpoint,
     storage: Storage,
+    index: PostIndex,
     date_filter,
     rotation: RotationManager,
     download_media: bool,
@@ -195,7 +202,8 @@ def _process_target(
                 comments_saved = True
                 totals["comments"] += len(item.comments)
 
-        storage.write_item(item)
+        path = storage.write_item(item)
+        index.record(item, path=str(path))
         checkpoint.mark_scraped(item.uid, media_paths=media_paths, comments_saved=comments_saved)
         totals["items"] += 1
 

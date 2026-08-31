@@ -15,6 +15,7 @@ from pathlib import Path
 from flask import Flask, render_template, request, jsonify, redirect
 
 import main as crawler_cli
+from core.index import PostIndex, index_path
 from core.run_history import RunHistory, run_history_path
 
 try:
@@ -125,12 +126,37 @@ def get_output_accounts():
                          'path': str(OUTPUT_DIR / source), 'post_count': n})
     return accounts
 
+def _index_if_present():
+    """Open index.db beside OUTPUT_DIR if it exists, else None.
+
+    Browse and the account page prefer the index (fast paging/counts on large
+    archives); falling back to the filesystem walk keeps them working before
+    the first crawl has built one, or if it's deleted (rebuild with
+    ``python main.py reindex``).
+    """
+    path = index_path(OUTPUT_DIR)
+    if not path.exists():
+        return None
+    return PostIndex(path)
+
 def get_accounts():
-    """Get accounts discovered in normalized orchestrator output."""
+    """Get accounts discovered in the index, or by walking normalized output."""
+    idx = _index_if_present()
+    if idx is not None:
+        try:
+            return [{**a, 'path': str(OUTPUT_DIR / a['platform'])} for a in idx.accounts()]
+        finally:
+            idx.close()
     return get_output_accounts()
 
 def get_account_stats(platform, account):
-    """Get statistics for a normalized-output account."""
+    """Get statistics for an account, from the index if present."""
+    idx = _index_if_present()
+    if idx is not None:
+        try:
+            return idx.account_stats(platform, account)
+        finally:
+            idx.close()
     posts = _output_posts(platform, account)
     dates = sorted(p['created_at'] for p in posts if p['created_at'])
     return {
@@ -141,8 +167,30 @@ def get_account_stats(platform, account):
         'earliest_post': dates[0] if dates else '',
     }
 
+def _post_from_path(path):
+    """Load the full post payload the index only points to, for display."""
+    try:
+        with open(path, encoding='utf-8') as fh:
+            return _item_to_post(json.load(fh))
+    except (OSError, json.JSONDecodeError):
+        return None
+
 def get_posts(platform, account, limit=50, offset=0):
-    """Get normalized posts for an account with pagination."""
+    """Get posts for an account with pagination, from the index if present.
+
+    The index gives fast counts and paging without walking the whole
+    account's directory; only the page's own JSON files are read back for
+    the full post payload (image_urls, metrics, url).
+    """
+    idx = _index_if_present()
+    if idx is not None:
+        try:
+            page = idx.list_posts(platform, account, limit=limit, offset=offset)
+        finally:
+            idx.close()
+        posts = [p for p in (_post_from_path(row['path']) for row in page['posts']) if p]
+        page['posts'] = posts
+        return page
     try:
         posts = _output_posts(platform, account)
 
