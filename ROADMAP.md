@@ -56,5 +56,5 @@ tractable, and search is what makes a large archive worth adding sources to.
 ## Later
 
 - [x] Export a date range as a static, self-contained HTML bundle
-- [ ] Per-source rate-limit backoff shared across scheduled runs
+- [x] Per-source rate-limit backoff shared across scheduled runs
 - [ ] Media deduplication by content hash across accounts
