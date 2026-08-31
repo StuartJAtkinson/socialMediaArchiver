@@ -44,6 +44,7 @@ python main.py status   [--config FILE]
 python main.py resume   [--config FILE]
 python main.py reindex  [--config FILE]
 python main.py search "<query>" [--platform P] [--account A] [--since DATE] [--until DATE]
+python main.py export --output DIR [--platform P] [--account A] [--since DATE] [--until DATE]
 ```
 
 `resume` clears the checkpoint so the next crawl starts from the beginning.
@@ -51,6 +52,9 @@ python main.py search "<query>" [--platform P] [--account A] [--since DATE] [--u
 if the index is ever deleted or falls out of sync.
 `search` runs a full-text query over archived post text via `index.db`'s FTS5
 table, with optional platform/account/date filters.
+`export` writes a static, self-contained HTML bundle (`index.html` plus a
+`media/` folder) of posts in a date range — no server or network access
+needed to view it.
 The dashboard’s **Start Archiving** button invokes the same orchestrator.
 
 ## Configuration

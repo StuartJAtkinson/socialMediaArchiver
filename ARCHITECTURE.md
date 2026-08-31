@@ -38,6 +38,8 @@ core.orchestrator
 - `core/index.py`: SQLite `index.db` of every post, upserted per item and
   rebuildable from the normalized JSON with `python main.py reindex`
 - `core/feeds.py`: shared RSS parsing
+- `core/export.py`: writes a date-range slice of the archive as a static,
+  self-contained HTML bundle (`python main.py export`)
 
 ## Connector contract
 

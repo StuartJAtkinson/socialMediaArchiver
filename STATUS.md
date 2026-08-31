@@ -23,6 +23,8 @@ optional S3-compatible mirroring.
       via `python main.py search`
 - [x] Optional dashboard authentication (`DASHBOARD_USERNAME`/
       `DASHBOARD_PASSWORD`) for non-local deployment
+- [x] Date-range export to a static, self-contained HTML bundle via
+      `python main.py export`
 
 ## Operational requirements
 
