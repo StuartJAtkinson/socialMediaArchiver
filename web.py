@@ -659,7 +659,10 @@ def api_config_sources():
         available = registry.available_sources()
         # Every available source gets a (possibly empty) editable block, so
         # Connect can configure one that has no entry in config.yaml yet.
-        full_block = {source: block.get(source) or {} for source in available}
+        full_block = {
+            source: block.get(source) or _SOURCE_DEFAULTS.get(source, {})
+            for source in available
+        }
         return jsonify({
             "sources": _mask_sources(full_block),
             "available": available,

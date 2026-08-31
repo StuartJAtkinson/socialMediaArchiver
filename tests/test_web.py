@@ -187,3 +187,18 @@ def test_api_config_sources_available_includes_every_registered_connector():
         'facebook', 'reddit', 'rss', 'twitter', 'youtube_community',
         'mastodon', 'bluesky',
     }
+
+
+def test_api_config_sources_has_an_editable_block_for_every_source():
+    # Sources with no `sources:` entry in config.yaml (mastodon, bluesky,
+    # youtube_community) must still get a dict so their Connect tab shows an
+    # editable form instead of "Pick a source above".
+    client = web.app.test_client()
+    data = client.get('/api/config/sources').get_json()
+
+    for source in data['available']:
+        assert isinstance(data['sources'].get(source), dict), source
+
+    assert 'token' in data['sources']['mastodon']
+    assert 'app_password' in data['sources']['bluesky']
+    assert data['sources']['bluesky']['app_password'] == ''
