@@ -144,3 +144,33 @@ def test_account_page_posts_have_anchor_ids_for_search_deep_links(tmp_path, monk
     assert resp.status_code == 200
     body = resp.get_data(as_text=True)
     assert 'id="post-one"' in body
+
+
+def test_normalize_metrics_maps_each_source_to_common_keys():
+    assert web._normalize_metrics({'likes': 5, 'retweets': 2, 'replies': 1}) == \
+        {'likes': 5, 'reposts': 2, 'replies': 1}
+    assert web._normalize_metrics({'score': 9, 'num_comments': 3}) == \
+        {'likes': 9, 'reposts': 0, 'replies': 3}
+    assert web._normalize_metrics({'favourites': 4, 'reblogs': 2, 'replies': 1}) == \
+        {'likes': 4, 'reposts': 2, 'replies': 1}
+    assert web._normalize_metrics({}) == {'likes': 0, 'reposts': 0, 'replies': 0}
+
+
+def test_account_page_shows_non_twitter_metrics(tmp_path, monkeypatch):
+    monkeypatch.setattr(web, 'OUTPUT_DIR', tmp_path)
+    directory = tmp_path / 'mastodon'
+    directory.mkdir(parents=True)
+    (directory / 'one.json').write_text(json.dumps({
+        'id': 'one', 'source': 'mastodon', 'target': '@example',
+        'url': 'https://example.test/one', 'timestamp': '2026-01-01', 'text': 'toot',
+        'media': [], 'metrics': {'favourites': 7, 'reblogs': 3, 'replies': 2},
+    }), encoding='utf-8')
+
+    client = web.app.test_client()
+    resp = client.get('/account/mastodon/@example')
+
+    assert resp.status_code == 200
+    body = resp.get_data(as_text=True)
+    assert '❤️ 7' in body
+    assert '🔄 3' in body
+    assert '💬 2' in body

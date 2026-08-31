@@ -115,6 +115,23 @@ def _iter_output_items(source):
         except (OSError, json.JSONDecodeError):
             continue  # ponytail: skip a corrupt/partial file rather than 500 the page
 
+
+# Item.metrics uses each source's own field names (Twitter: likes/retweets/
+# replies, Reddit: score/num_comments, Mastodon: favourites/reblogs/replies,
+# Bluesky: likes/reposts/replies, ...). Normalize to one (likes, reposts,
+# replies) shape so the account page doesn't have to know every source's names.
+_METRIC_ALIASES = {
+    'likes': ('likes', 'favourites', 'score'),
+    'reposts': ('retweets', 'reblogs', 'reposts'),
+    'replies': ('replies', 'num_comments', 'comments_count'),
+}
+
+def _normalize_metrics(metrics):
+    out = {}
+    for canonical, aliases in _METRIC_ALIASES.items():
+        out[canonical] = next((metrics[k] for k in aliases if k in metrics), 0)
+    return out
+
 def _item_to_post(item):
     """Map a normalized Item to the shape templates expect."""
     imgs = [m['url'] for m in item.get('media', [])
@@ -125,7 +142,7 @@ def _item_to_post(item):
         'url': item.get('url', ''),
         'created_at': item.get('timestamp', ''),
         'image_urls': imgs,
-        'metrics': item.get('metrics') or {},
+        'metrics': _normalize_metrics(item.get('metrics') or {}),
     }
 
 def _output_posts(platform, account):

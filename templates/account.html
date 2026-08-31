@@ -232,7 +232,7 @@
                         
                         <div class="post-metrics">
                             <div class="metric">❤️ {{ post.metrics.likes or 0 }}</div>
-                            <div class="metric">🔄 {{ post.metrics.retweets or 0 }}</div>
+                            <div class="metric">🔄 {{ post.metrics.reposts or 0 }}</div>
                             <div class="metric">💬 {{ post.metrics.replies or 0 }}</div>
                         </div>
                     </div>
@@ -332,7 +332,7 @@
                     ` : ''}
                     <div class="post-metrics">
                         <div class="metric">❤️ ${post.metrics.likes || 0}</div>
-                        <div class="metric">🔄 ${post.metrics.retweets || 0}</div>
+                        <div class="metric">🔄 ${post.metrics.reposts || 0}</div>
                         <div class="metric">💬 ${post.metrics.replies || 0}</div>
                     </div>
                 </div>
