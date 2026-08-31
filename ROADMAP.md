@@ -44,7 +44,7 @@ tractable, and search is what makes a large archive worth adding sources to.
       token optional for followers-only posts. Normalizes to the same post
       shape as the others, including boosts and media attachments. Mirrors
       `connectors/` structure; instance host is per-target config.
-- [ ] Bluesky connector — AT Protocol `app.bsky.feed.getAuthorFeed` via an app
+- [x] Bluesky connector — AT Protocol `app.bsky.feed.getAuthorFeed` via an app
       password. Handles reposts, quote posts, and the blob CDN for media.
       Credentials through the same Connect stage as every other source.
 - [ ] Dashboard authentication for non-local deployment — the server binds
