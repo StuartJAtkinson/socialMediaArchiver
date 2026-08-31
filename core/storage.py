@@ -14,6 +14,7 @@ same for Azure Blob Storage.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import re
@@ -71,10 +72,14 @@ class Storage:
 
     # --- media ---
     def download_media(self, url: str, item_uid: str, index: int = 0) -> Optional[str]:
-        """Download ``url`` into the media dir, naming by uid + index.
+        """Download ``url`` into the media dir, naming by content hash.
 
+        Naming by the sha256 of the bytes (rather than by item/index) means the
+        same image or video reposted, boosted, or shared across different
+        accounts — even across sources — is written to disk exactly once;
+        every item that references it just points at the same file.
         Extension is taken from the Content-Type header, falling back to the URL.
-        Returns the local path, or None on failure. Existing files are reused.
+        Returns the local path, or None on failure.
         """
         try:
             try:
@@ -91,17 +96,19 @@ class Storage:
                 ext_part = url.split("?")[0].rsplit(".", 1)[-1]
                 ext = ext_part[:4].lower() if len(ext_part) <= 4 and ext_part.isalnum() else "bin"
 
-            filename = f"{_safe(item_uid)}_{index}.{ext}"
+            with self._opener.open(url, timeout=30) as resp:
+                data = resp.read()
+
+            content_hash = hashlib.sha256(data).hexdigest()
+            filename = f"{content_hash}.{ext}"
             filepath = self.media_dir / filename
 
             if filepath.exists():
-                if filepath.suffix[1:] == ext:
-                    self.logger.debug("Media already exists: %s", filename)
-                    return str(filepath)
-                filepath.unlink()  # extension changed; re-download
+                self.logger.debug("Media already exists (dedup hit): %s", filename)
+                return str(filepath)
 
-            with self._opener.open(url, timeout=30) as resp, open(filepath, "wb") as out:
-                out.write(resp.read())
+            with open(filepath, "wb") as out:
+                out.write(data)
             self.logger.info("Downloaded media: %s", filename)
             return str(filepath)
         except Exception as e:

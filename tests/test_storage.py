@@ -179,3 +179,70 @@ def test_azure_backend_requires_a_container():
             {"storage": {"backend": "azure", "azure": {}}},
             logging.getLogger("test"),
         )
+
+
+class _FakeMediaResponse:
+    def __init__(self, data=b"", headers=None):
+        self._data = data
+        self.headers = headers or {}
+
+    def read(self):
+        return self._data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+class _FakeMediaOpener:
+    """Stands in for Storage._opener: HEAD gives content-type, GET gives bytes."""
+
+    def __init__(self, data: bytes, content_type: str = "image/png"):
+        self.data = data
+        self.content_type = content_type
+
+    def open(self, req_or_url, timeout=None):
+        if hasattr(req_or_url, "get_method") and req_or_url.get_method() == "HEAD":
+            return _FakeMediaResponse(headers={"Content-Type": self.content_type})
+        return _FakeMediaResponse(data=self.data)
+
+
+def test_download_media_names_file_by_content_hash(tmp_path):
+    import hashlib
+    from pathlib import Path
+
+    storage = Storage(str(tmp_path / "out"), str(tmp_path / "media"), logging.getLogger("test"))
+    data = b"hello-world"
+    storage._opener = _FakeMediaOpener(data)
+
+    path = storage.download_media("https://example.test/a.png", "twitter:1", 0)
+
+    assert Path(path).name == f"{hashlib.sha256(data).hexdigest()}.png"
+
+
+def test_download_media_dedups_identical_content_across_accounts(tmp_path):
+    from pathlib import Path
+
+    storage = Storage(str(tmp_path / "out"), str(tmp_path / "media"), logging.getLogger("test"))
+    storage._opener = _FakeMediaOpener(b"same-bytes")
+
+    p1 = storage.download_media("https://example.test/a.png", "twitter:1", 0)
+    p2 = storage.download_media("https://example.test/b.png", "reddit:2", 0)
+
+    assert p1 == p2
+    assert len(list((tmp_path / "media").glob("*.png"))) == 1
+
+
+def test_download_media_keeps_distinct_content_separate(tmp_path):
+    storage = Storage(str(tmp_path / "out"), str(tmp_path / "media"), logging.getLogger("test"))
+
+    storage._opener = _FakeMediaOpener(b"content-a")
+    p1 = storage.download_media("https://example.test/a.png", "twitter:1", 0)
+
+    storage._opener = _FakeMediaOpener(b"content-b")
+    p2 = storage.download_media("https://example.test/b.png", "twitter:1", 1)
+
+    assert p1 != p2
+    assert len(list((tmp_path / "media").glob("*.png"))) == 2
