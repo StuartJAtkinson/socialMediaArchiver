@@ -63,8 +63,11 @@ Current connectors:
 ## Storage schema
 
 Each record is written to `output/<source>/<safe-id>.json`; comments use
-`<safe-id>_comments.json`. Media is stored under `output/images/` and referenced
-by `media[].local_path`.
+`<safe-id>_comments.json`. Media is stored under `output/images/`, named by the
+sha256 of its bytes rather than by item/index, and referenced by
+`media[].local_path`. The same image or video reposted, boosted, or shared
+across different accounts — even across sources — is downloaded and written
+once; every item that references it points at the same file.
 
 The S3, GCS, and Azure Blob backends mirror these relative keys beneath an
 optional prefix while retaining local files. This keeps dashboard behavior

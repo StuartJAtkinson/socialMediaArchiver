@@ -27,6 +27,7 @@ optional S3-compatible mirroring.
       `python main.py export`
 - [x] Per-source rate-limit backoff persisted to `.rate_backoff.json`, shared
       across scheduled runs
+- [x] Media deduplication by content hash across accounts and sources
 
 ## Operational requirements
 
