@@ -1,2 +1,8 @@
-- `templates/account.html` is still a legacy vanilla-JS/DOM page (own inline `<style>` block, manual `fetch()` + DOM patching, no `x-data="page()"`/Alpine), while every other page (`index.html`, all of `templates/stages/*.html`) shares an Alpine.js `page()`/`init()` architecture with a dedicated `static/js/<stage>.js`. Whether/when to port `account.html` onto that same architecture is a scope call, not a one-line fix.
-- The new `python main.py export` command (date-range HTML bundle export) has no dashboard entry point at all — no button, no stage page, nothing under `templates/`. That matches the existing precedent set by `reindex` (also CLI-only), so it's not an objective inconsistency, but `search` and `schedule` both got full dashboard UI alongside their CLI command. Whether `export` should get a Browse-stage "Export range" control, stay CLI-only like `reindex`, or something in between is a scope call, not a bug.
+# Considerations
+
+*Nothing open — both parked scope calls were decided 2026-09-04:*
+- `templates/account.html` **ported** to the shared Alpine `page()` architecture
+  (`static/js/account.js`, styles moved into `static/base.css`).
+- `python main.py export` **got a dashboard entry point**: Browse's
+  "Export these results" button, reusing the search filters rather than a
+  second set of date pickers.

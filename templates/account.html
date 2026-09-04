@@ -1,354 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ account }} — Social Media Archiver</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/static/base.css" />
-    <style>
-        /* Page-specific styles only — the palette, body defaults, scrollbars
-           and the shared .stats-bar/.stat-item live in /static/base.css. */
-
-        .container {
-            max-width: 1600px;
-            padding: 12px 16px 24px;
-        }
-
-        .header,
-        .controls,
-        .post,
-        .no-posts {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            box-shadow: none;
-        }
-
-        .header {
-            min-height: 48px;
-            margin-bottom: 8px;
-            padding: 8px 14px;
-            border-radius: 8px;
-        }
-
-        .header h1 {
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        .header .back-btn,
-        .get-more-btn {
-            background: transparent;
-            color: #cbd5e1;
-            border: 1px solid var(--border);
-            border-radius: 7px;
-            padding: 6px 10px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            line-height: 1.2;
-        }
-
-        .header .back-btn:hover,
-        .get-more-btn:hover {
-            background: rgba(255,255,255,.05);
-            color: #fff;
-            border-color: #475569;
-            box-shadow: none;
-            transform: none;
-        }
-
-        .get-more-btn {
-            color: var(--accent-fg);
-            border-color: var(--accent-border);
-            background: var(--accent-bg);
-        }
-
-        .get-more-btn:disabled {
-            background: transparent;
-            border-color: var(--border);
-            color: var(--faint);
-            opacity: .65;
-        }
-
-        .controls {
-            background: var(--band);
-            margin-bottom: 12px;
-            padding: 7px 10px;
-            border-radius: 7px;
-        }
-
-        .loading-text,
-        .loading,
-        .no-posts,
-        .post-metrics {
-            color: var(--muted);
-        }
-
-        .posts-container {
-            gap: 10px;
-        }
-
-        .post {
-            border-radius: 8px;
-            transition: border-color .12s ease, background-color .12s ease;
-        }
-
-        .post:hover {
-            transform: none;
-            background: #1c1f2b;
-            border-color: #414660;
-            box-shadow: none;
-        }
-
-        .post-header {
-            min-height: 36px;
-            padding: 7px 11px;
-            background: var(--band);
-            border-bottom: 1px solid var(--border-soft);
-            color: var(--muted);
-        }
-
-        .post-date {
-            font-size: 0.72rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .post-url {
-            font-size: 0.7rem;
-        }
-
-        .post-url a {
-            color: var(--accent);
-        }
-
-        .post-content {
-            padding: 12px;
-        }
-
-        .post-text {
-            color: #cbd5e1;
-            font-size: 0.86rem;
-            line-height: 1.5;
-        }
-
-        .post-image {
-            border: 1px solid var(--border-soft);
-            border-radius: 6px;
-            box-shadow: none;
-        }
-
-        .post-metrics {
-            border-color: var(--border-soft);
-            font-size: 0.7rem;
-        }
-
-        .error {
-            background: rgba(127,29,29,.25);
-            color: #fca5a5;
-            border-color: rgba(153,27,27,.7);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ account }} — Social Media Archiver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/js/account.js?v=1"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body>
-    {% with stage_actions = '' %}
-      {% include "_nav.html" %}
-    {% endwith %}
-    <div class="container">
-        <div class="header">
-            <h1>@{{ account }} ({{ platform }})</h1>
-            <a href="/browse" class="back-btn">← Back to Browse</a>
-        </div>
+<body class="flex flex-col h-screen overflow-hidden"
+      x-data="page()" x-init="init()" x-cloak
+      data-platform="{{ platform }}" data-account="{{ account }}">
+  {% with stage_actions = '' %}
+    {% include "_nav.html" %}
+  {% endwith %}
 
-        {% if stats.error %}
-        <div class="error">
-            Error loading account stats: {{ stats.error }}
-        </div>
-        {% else %}
-        <div class="stats-bar">
-            <div class="stat-item">
-                <span class="label">Total Posts</span>
-                <span class="value">{{ stats.post_count or 0 }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Images</span>
-                <span class="value">{{ stats.image_count or 0 }}</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Videos</span>
-                <span class="value">{{ stats.video_count or 0 }}</span>
-            </div>
-            {% if stats.earliest_post %}
-            <div class="stat-item">
-                <span class="label">Earliest Post</span>
-                <span class="value">{{ stats.earliest_post[:10] }}</span>
-            </div>
-            {% endif %}
-            {% if stats.latest_post %}
-            <div class="stat-item">
-                <span class="label">Latest Post</span>
-                <span class="value">{{ stats.latest_post[:10] }}</span>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-        
-        <div class="controls">
-            <button id="get-more-btn" class="get-more-btn" onclick="loadMorePosts()">
-                Get More Posts
-            </button>
-            <span id="loading-text" class="loading-text" style="display: none;">Loading posts...</span>
-        </div>
-        
-        <div id="posts-container" class="posts-container">
-            {% if posts_data.error %}
-            <div class="error">
-                Error loading posts: {{ posts_data.error }}
-            </div>
-            {% elif posts_data.posts %}
-                {% for post in posts_data.posts %}
-                <div class="post" id="post-{{ post.post_id }}" data-post-id="{{ post.post_id }}">
-                    <div class="post-header">
-                        <div class="post-date">
-                            {{ post.created_at[:19].replace('T', ' ') if post.created_at else 'Unknown date' }}
-                        </div>
-                        <div class="post-url">
-                            <a href="{{ post.url }}" target="_blank">View Original →</a>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        <div class="post-text">{{ post.text | replace('<p>', '') | replace('</p>', '') | replace('<br />', '\n') | replace('<br>', '\n') | striptags }}</div>
-                        
-                        {% if post.image_urls %}
-                        <div class="post-media">
-                            <div class="post-images">
-                                {% for image_url in post.image_urls %}
-                                <img src="{{ image_url }}" alt="Post image" class="post-image" onerror="this.style.display='none'">
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="post-metrics">
-                            <div class="metric">❤️ {{ post.metrics.likes or 0 }}</div>
-                            <div class="metric">🔄 {{ post.metrics.reposts or 0 }}</div>
-                            <div class="metric">💬 {{ post.metrics.replies or 0 }}</div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-            <div class="no-posts">
-                <h3>No posts found</h3>
-                <p>This account hasn't been archived yet. Click "Get More Posts" to start archiving.</p>
-            </div>
-            {% endif %}
-        </div>
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+    <div class="stage-header mb-5">
+      <!-- Some sources already store the leading @; don't render "@@name". -->
+      <h1>{{ '@' ~ account.lstrip('@') }}</h1>
+      <p>{{ platform }} · <a href="/browse" style="color:var(--accent)">back to Browse</a></p>
     </div>
 
-    <script>
-        let currentOffset = {{ posts_data.offset or 0 }};
-        const limit = {{ posts_data.limit or 20 }};
-        let hasMore = {{ posts_data.has_more | tojson }};
-        let isLoading = false;
+    {% if stats.error %}
+    <div class="field-error mb-5">Error loading account stats: {{ stats.error }}</div>
+    {% else %}
+    <div class="stats-bar mb-5">
+      <div class="stat-item">
+        <span class="label">Total Posts</span>
+        <span class="value">{{ stats.post_count or 0 }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">Images</span>
+        <span class="value">{{ stats.image_count or 0 }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">Videos</span>
+        <span class="value">{{ stats.video_count or 0 }}</span>
+      </div>
+      {% if stats.earliest_post %}
+      <div class="stat-item">
+        <span class="label">Earliest Post</span>
+        <span class="value">{{ stats.earliest_post[:10] }}</span>
+      </div>
+      {% endif %}
+      {% if stats.latest_post %}
+      <div class="stat-item">
+        <span class="label">Latest Post</span>
+        <span class="value">{{ stats.latest_post[:10] }}</span>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
 
-        function loadMorePosts() {
-            if (isLoading || !hasMore) return;
-            
-            isLoading = true;
-            const btn = document.getElementById('get-more-btn');
-            const loadingText = document.getElementById('loading-text');
-            
-            btn.disabled = true;
-            loadingText.style.display = 'inline';
-            
-            currentOffset += limit;
-            
-            fetch(`/api/posts/{{ platform }}/{{ account }}?limit=${limit}&offset=${currentOffset}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert('Error loading posts: ' + data.error);
-                        return;
-                    }
-                    
-                    hasMore = data.has_more;
-                    
-                    // Add new posts to the container
-                    const container = document.getElementById('posts-container');
-                    data.posts.forEach(post => {
-                        const postElement = createPostElement(post);
-                        container.appendChild(postElement);
-                    });
-                    
-                    // Update button state
-                    if (!hasMore) {
-                        btn.textContent = 'No More Posts';
-                        btn.disabled = true;
-                    }
-                })
-                .catch(error => {
-                    alert('Error loading posts: ' + error.message);
-                })
-                .finally(() => {
-                    isLoading = false;
-                    btn.disabled = !hasMore;
-                    loadingText.style.display = 'none';
-                });
-        }
+    <p class="field-error mb-3" x-show="errorMsg" x-text="errorMsg"></p>
 
-        function createPostElement(post) {
-            const postDiv = document.createElement('div');
-            postDiv.className = 'post';
-            postDiv.id = 'post-' + post.post_id;
-            postDiv.setAttribute('data-post-id', post.post_id);
-            
-            const dateStr = post.created_at ? post.created_at.substring(0, 19).replace('T', ' ') : 'Unknown date';
-            const textContent = post.text
-                .replace(/<p>/g, '')
-                .replace(/<\/p>/g, '')
-                .replace(/<br \/>/g, '\n')
-                .replace(/<br>/g, '\n')
-                .replace(/<[^>]*>/g, ''); // Remove HTML tags
-            
-            postDiv.innerHTML = `
-                <div class="post-header">
-                    <div class="post-date">${dateStr}</div>
-                    <div class="post-url">
-                        <a href="${post.url}" target="_blank">View Original →</a>
-                    </div>
-                </div>
-                <div class="post-content">
-                    <div class="post-text">${textContent}</div>
-                    ${post.image_urls && post.image_urls.length > 0 ? `
-                    <div class="post-media">
-                        <div class="post-images">
-                            ${post.image_urls.map(url => 
-                                `<img src="${url}" alt="Post image" class="post-image" onerror="this.style.display='none'">`
-                            ).join('')}
-                        </div>
-                    </div>
-                    ` : ''}
-                    <div class="post-metrics">
-                        <div class="metric">❤️ ${post.metrics.likes || 0}</div>
-                        <div class="metric">🔄 ${post.metrics.reposts || 0}</div>
-                        <div class="metric">💬 ${post.metrics.replies || 0}</div>
-                    </div>
-                </div>
-            `;
-            
-            return postDiv;
-        }
+    <div class="space-y-3">
+      <template x-for="post in posts" :key="post.post_id">
+        <!-- id= is the anchor Browse's search results link to. -->
+        <div class="panel post" :id="'post-' + post.post_id" :data-post-id="post.post_id">
+          <div class="post-header">
+            <span class="post-date" x-text="fmtDate(post.created_at)"></span>
+            <a :href="post.url" target="_blank" class="post-url">View Original →</a>
+          </div>
+          <div class="post-content">
+            <p class="post-text" x-text="postText(post)"></p>
+            <div class="post-images" x-show="post.image_urls && post.image_urls.length">
+              <template x-for="url in (post.image_urls || [])" :key="url">
+                <img :src="url" alt="Post image" class="post-image" onerror="this.style.display='none'" />
+              </template>
+            </div>
+            <div class="post-metrics">
+              <span x-text="'❤️ ' + (post.metrics?.likes || 0)"></span>
+              <span x-text="'🔄 ' + (post.metrics?.reposts || 0)"></span>
+              <span x-text="'💬 ' + (post.metrics?.replies || 0)"></span>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
 
-        // Update button state on load
-        document.addEventListener('DOMContentLoaded', function() {
-            const btn = document.getElementById('get-more-btn');
-            if (!hasMore) {
-                btn.textContent = 'No More Posts';
-                btn.disabled = true;
-            }
-        });
-    </script>
+    <template x-if="loading">
+      <p class="text-xs mt-3" style="color:var(--faint)">Loading posts…</p>
+    </template>
+    <template x-if="!loading && posts.length === 0 && !errorMsg">
+      <div class="panel p-5">
+        <h3 class="text-sm font-semibold text-white mb-1">No posts found</h3>
+        <p class="text-xs" style="color:var(--muted)">
+          This account hasn't been archived yet. Start a crawl from
+          <a href="/run" style="color:var(--accent)">Run</a>.
+        </p>
+      </div>
+    </template>
+
+    <div class="mt-4" x-show="posts.length > 0">
+      <button @click="more()" class="stage-actions" style="cursor:pointer"
+              :disabled="loading || !hasMore"
+              x-text="hasMore ? (loading ? 'Loading…' : 'Get more posts') : 'No more posts'"></button>
+    </div>
+  </div>
 </body>
 </html>

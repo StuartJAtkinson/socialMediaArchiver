@@ -63,8 +63,13 @@ def export_range(
     until: str = "",
     platform: str = "",
     account: str = "",
+    query: str = "",
 ) -> Path:
     """Write a self-contained HTML export of posts in ``[since, until]``.
+
+    With ``query`` set, exports the full-text search hits for it under the same
+    filters instead of the whole range — that's what the Browse stage's
+    "Export these results" button sends.
 
     Returns the path to the generated ``index.html``.
     """
@@ -76,7 +81,17 @@ def export_range(
     path = index_path(out)
     idx = PostIndex(path) if path.exists() else rebuild(out)
     try:
-        rows = idx.range_posts(since=since, until=until, platform=platform, account=account)
+        if query:
+            # ponytail: one big page rather than paging — an export is a
+            # one-shot batch job, not an interactive list.
+            rows = idx.search(
+                query, platform=platform, account=account,
+                since=since, until=until, limit=100000,
+            )["results"]
+        else:
+            rows = idx.range_posts(
+                since=since, until=until, platform=platform, account=account
+            )
     finally:
         idx.close()
 
@@ -89,6 +104,8 @@ def export_range(
         cards.append(_post_html(row, item, media_dir))
 
     range_desc = " to ".join(p for p in (since, until) if p) or "all time"
+    if query:
+        range_desc = f'"{query}" · {range_desc}'
     page = (
         "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
         f"<title>Archive export ({html.escape(range_desc)})</title>"

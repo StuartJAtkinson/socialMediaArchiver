@@ -120,6 +120,7 @@ def cmd_export(cfg: dict, args: argparse.Namespace) -> None:
         until=args.until or "",
         platform=args.platform or "",
         account=args.account or "",
+        query=args.query or "",
     )
     logger.info("Exported archive bundle to %s", index_file)
 

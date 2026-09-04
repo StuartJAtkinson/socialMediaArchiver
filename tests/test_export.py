@@ -76,6 +76,19 @@ def test_export_range_copies_local_media_into_bundle(tmp_path):
     assert f"media/{copied[0].name}" in body
 
 
+def test_export_range_with_query_exports_only_search_hits(tmp_path):
+    out = tmp_path / "output"
+    _write_item(out, "twitter", "one", timestamp="2026-01-01", text="launch day")
+    _write_item(out, "twitter", "two", timestamp="2026-01-02", text="unrelated chatter")
+
+    dest = tmp_path / "bundle"
+    body = export_range(out, dest, query="launch").read_text(encoding="utf-8")
+
+    assert "launch day" in body
+    assert "unrelated chatter" not in body
+    assert "1 post(s)" in body
+
+
 def test_export_range_rebuilds_index_when_missing(tmp_path):
     out = tmp_path / "output"
     _write_item(out, "twitter", "one", timestamp="2026-01-01", text="rebuilt")

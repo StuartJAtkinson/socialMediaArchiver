@@ -6,7 +6,7 @@
   <title>Browse — Social Media Archiver</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/base.css" />
-  <script defer src="/static/js/browse.js?v=1"></script>
+  <script defer src="/static/js/browse.js?v=4"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
@@ -49,13 +49,32 @@
           Search
         </button>
       </div>
-      <template x-if="searched && !searching">
+      <!-- Filters are shared: they narrow the search and the export alike. -->
+      <div class="flex gap-2 flex-wrap mt-2">
+        <select class="field-input" x-model="filters.platform" style="max-width:150px">
+          <option value="">Any platform</option>
+          <template x-for="p in platforms" :key="p">
+            <option :value="p" x-text="p"></option>
+          </template>
+        </select>
+        <input type="text" class="field-input" placeholder="Any account"
+               x-model="filters.account" @keyup.enter="search()" style="max-width:150px" />
+        <input type="date" class="field-input" x-model="filters.since" style="max-width:150px" title="Posted on or after" />
+        <input type="date" class="field-input" x-model="filters.until" style="max-width:150px" title="Posted on or before" />
+        <button @click="exportResults()" class="stage-actions" style="cursor:pointer"
+                :disabled="exporting" x-text="exporting ? 'Exporting…' : 'Export these results'"></button>
+      </div>
+      <p class="field-error mt-2" x-show="searchError" x-text="searchError"></p>
+      <template x-if="searched && !searching && !searchError">
         <p class="text-xs mt-2" style="color:var(--faint)" x-text="results.length + ' of ' + searchTotal + ' match(es)'"></p>
+      </template>
+      <template x-if="exportMsg">
+        <p class="text-xs mt-2" style="color:var(--faint)" x-text="exportMsg"></p>
       </template>
       <div class="mt-2 space-y-1.5" x-show="results.length > 0">
         <template x-for="r in results" :key="r.platform + ':' + r.post_id">
           <a :href="'/account/' + r.platform + '/' + r.account + '#post-' + r.post_id" class="block panel-band p-2 text-xs" style="text-decoration:none;color:var(--text)">
-            <span style="color:var(--faint)" x-text="'[' + r.platform + '] @' + r.account + '  ' + (r.posted_at || '')"></span>
+            <span style="color:var(--faint)" x-text="'[' + r.platform + '] ' + handle(r.account) + '  ' + (r.posted_at || '')"></span>
             <div x-text="r.snippet"></div>
           </a>
         </template>
@@ -80,7 +99,7 @@
         <template x-for="account in accounts" :key="account.platform + ':' + account.account">
           <div class="account-card">
             <span class="platform" x-text="account.platform"></span>
-            <h3 x-text="'@' + account.account"></h3>
+            <h3 x-text="handle(account.account)"></h3>
             <div class="stats" x-text="(account.post_count ?? 0) + ' posts'"></div>
             <a :href="'/account/' + account.platform + '/' + account.account" class="view-btn">View Posts</a>
           </div>

@@ -135,15 +135,18 @@ def test_auth_required_when_credentials_set(monkeypatch):
 
 
 def test_account_page_posts_have_anchor_ids_for_search_deep_links(tmp_path, monkeypatch):
+    # The account page renders its posts client-side (static/js/account.js), so
+    # the #post-<id> anchor Browse's search results link to is built from
+    # post_id in the API payload.
     monkeypatch.setattr(web, 'OUTPUT_DIR', tmp_path)
     _write_item(tmp_path, 'twitter', 'one')
 
     client = web.app.test_client()
-    resp = client.get('/account/twitter/@example')
+    body = client.get('/account/twitter/@example').get_data(as_text=True)
+    assert "'post-' + post.post_id" in body
 
-    assert resp.status_code == 200
-    body = resp.get_data(as_text=True)
-    assert 'id="post-one"' in body
+    data = client.get('/api/posts/twitter/@example').get_json()
+    assert [p['post_id'] for p in data['posts']] == ['one']
 
 
 def test_normalize_metrics_maps_each_source_to_common_keys():
@@ -167,13 +170,12 @@ def test_account_page_shows_non_twitter_metrics(tmp_path, monkeypatch):
     }), encoding='utf-8')
 
     client = web.app.test_client()
-    resp = client.get('/account/mastodon/@example')
+    assert client.get('/account/mastodon/@example').status_code == 200
 
-    assert resp.status_code == 200
-    body = resp.get_data(as_text=True)
-    assert '❤️ 7' in body
-    assert '🔄 3' in body
-    assert '💬 2' in body
+    # Metrics are normalized server-side and rendered by account.js, so assert
+    # on the payload the page actually consumes.
+    data = client.get('/api/posts/mastodon/@example').get_json()
+    assert data['posts'][0]['metrics'] == {'likes': 7, 'reposts': 3, 'replies': 2}
 
 
 def test_api_config_sources_available_includes_every_registered_connector():
@@ -202,3 +204,18 @@ def test_api_config_sources_has_an_editable_block_for_every_source():
     assert 'token' in data['sources']['mastodon']
     assert 'app_password' in data['sources']['bluesky']
     assert data['sources']['bluesky']['app_password'] == ''
+
+
+def test_api_export_uses_the_browse_filters(tmp_path, monkeypatch):
+    monkeypatch.setattr(web, "OUTPUT_DIR", tmp_path)
+    _write_item(tmp_path, "twitter", "one", timestamp="2026-01-01")
+    _write_item(tmp_path, "reddit", "two", timestamp="2026-01-02")
+
+    client = web.app.test_client()
+    data = client.post('/api/export', json={'platform': 'twitter'}).get_json()
+
+    body = open(data['path'], encoding='utf-8').read()
+    assert 'post one' in body
+    assert 'post two' not in body
+    # The returned url is servable, so the button can open the bundle.
+    assert client.get(data['url']).status_code == 200

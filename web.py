@@ -12,10 +12,15 @@ import json
 import math
 import os
 import threading
+from datetime import datetime
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, redirect, Response
+from flask import (
+    Flask, render_template, request, jsonify, redirect, Response,
+    send_from_directory,
+)
 
 import main as crawler_cli
+from core.export import export_range
 from core.index import PostIndex, index_path
 from core.run_history import RunHistory, run_history_path
 
@@ -341,16 +346,18 @@ def legacy_dashboard():
 
 @app.route('/account/<platform>/<path:account>')
 def view_account(platform, account):
-    """View posts for a specific account."""
+    """View posts for a specific account.
+
+    Stats render server-side (they don't change while the page is open); the
+    post list is loaded and paged by static/js/account.js off /api/posts.
+    """
     stats = get_account_stats(platform, account)
-    posts_data = get_posts(platform, account, limit=20, offset=0)
     ctx = _stage_context(active='browse')
 
     return render_template('account.html',
                          platform=platform,
                          account=account,
                          stats=stats,
-                         posts_data=posts_data,
                          tabs=ctx['tabs'],
                          active_label=ctx['active_label'],
                          stage_actions=ctx['stage_actions'])
@@ -393,6 +400,35 @@ def api_search():
         ))
     finally:
         idx.close()
+
+
+@app.route('/api/export', methods=['POST'])
+def api_export():
+    """Export whatever Browse is currently filtered to, as an HTML bundle.
+
+    Takes the same filters the search box sends, so the button exports the
+    results on screen rather than asking for a second set of dates.
+    """
+    body = request.get_json(silent=True) or {}
+    dest = OUTPUT_DIR / 'exports' / f"export-{datetime.now():%Y%m%d-%H%M%S}"
+    try:
+        index_file = export_range(
+            OUTPUT_DIR, dest,
+            since=body.get('since', ''),
+            until=body.get('until', ''),
+            platform=body.get('platform', ''),
+            account=body.get('account', ''),
+            query=(body.get('q') or '').strip(),
+        )
+    except Exception as e:  # index missing, unreadable output dir, …
+        return jsonify({'error': str(e)}), 500
+    return jsonify({'path': str(index_file), 'url': f'/exports/{dest.name}/index.html'})
+
+
+@app.route('/exports/<path:relpath>')
+def serve_export(relpath):
+    """Serve a generated bundle so the Export button can open it in a tab."""
+    return send_from_directory(OUTPUT_DIR / 'exports', relpath)
 
 
 @app.route('/api/archive/start', methods=['POST'])
