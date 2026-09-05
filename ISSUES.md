@@ -47,3 +47,8 @@
   metadata and credential setup. *(resolved 2026-06-12)*
 - [x] **Monolith lacked provider isolation** — split source logic into
   `connectors/` and generic plumbing into `core/`. *(resolved 2026-06-06)*
+
+## Needs input (Auto Continue)
+*Left by Auto Continue 2026-09-05 — decide these, then clear CONSIDERATIONS.md.*
+- - `templates/account.html` ported to the shared Alpine `page()` architecture
+- `python main.py export` got a dashboard entry point: Browse
