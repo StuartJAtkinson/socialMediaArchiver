@@ -1,6 +1,8 @@
 # Issues
 
 ## Open
+- [ ] **`python main.py export` **got a dashboard entry point**: Browse's** — decided: This doesn't make sense?. Implement this decision. *(answered 2026-09-05)*
+- [ ] **`templates/account.html` **ported** to the shared Alpine `page()` architecture** — decided: Do this. Implement this decision. *(answered 2026-09-05)*
 - [ ] **`youtube_community` posts carry relative timestamps ("1 month ago") instead of ISO dates** — the connector stores whatever YouTube renders, so `posted_at` is a human string. Consequences: `account.html`'s stats slice it to 10 chars and print `9 months a`; date-range filters and export's `since`/`until` (which compare lexically against ISO strings) silently exclude every youtube_community post; index ordering is alphabetical, not chronological. Fix belongs in `connectors/youtube_community.py` — resolve the relative string to an absolute date at crawl time, then `python main.py reindex`. *(found 2026-09-04)*
 
 ## Resolved
