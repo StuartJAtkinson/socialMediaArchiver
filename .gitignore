@@ -116,3 +116,6 @@ target/
 .cursorindexingignore
 
 startStop.md
+
+# Generated style ballot (regenerated each UX pass; STYLE.md/UX.md are tracked)
+STYLE.html
