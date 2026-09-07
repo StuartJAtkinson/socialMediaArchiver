@@ -22,14 +22,11 @@
 
     <div class="panel p-4">
       <label class="field-label">Backend</label>
-      <div class="flex flex-wrap gap-2 mb-5">
+      <div class="source-tabs flex flex-wrap mb-5">
         <template x-for="b in backends" :key="b">
-          <label class="cursor-pointer">
-            <input type="radio" name="backend" class="peer hidden" :value="b" x-model="draft.backend" />
-            <span class="status idle peer-checked:status-done peer-checked:border-0 px-3 py-1.5 text-xs"
-                  :class="draft.backend === b ? 'status-done' : 'idle'"
-                  x-text="b"></span>
-          </label>
+          <button @click="draft.backend = b"
+                  :class="draft.backend === b ? 'active' : ''"
+                  x-text="b"></button>
         </template>
       </div>
 

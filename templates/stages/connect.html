@@ -21,12 +21,10 @@
     </div>
 
     <!-- Source tabs -->
-    <div class="flex flex-wrap gap-2 mb-5">
+    <div class="source-tabs flex flex-wrap mb-5">
       <template x-for="s in sources" :key="s">
         <button @click="active = s"
-                class="status idle"
-                :class="active === s ? 'status-done' : 'idle'"
-                style="cursor:pointer"
+                :class="active === s ? 'active' : ''"
                 x-text="s"></button>
       </template>
     </div>

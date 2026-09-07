@@ -328,7 +328,7 @@ button.stage-actions:disabled {
   font-size: 12px;
 }
 
-/* Source-tab strip inside Connect stage. */
+/* Underline tab strip: Connect's source selector, Storage's backend selector. */
 .source-tabs button {
   background: transparent;
   color: var(--muted);
