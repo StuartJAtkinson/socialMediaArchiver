@@ -30,7 +30,12 @@
         <p class="text-xs" style="color:var(--faint)">Loading…</p>
       </template>
       <template x-if="!loading && rows.length === 0">
-        <p class="text-xs" style="color:var(--faint)">No targets yet. Add one below.</p>
+        <div class="panel p-5">
+          <h3 class="text-sm font-semibold text-white mb-1">No targets yet</h3>
+          <p class="text-xs" style="color:var(--muted)">
+            Add one below — pick a source and a handle, feed URL, subreddit, or channel id.
+          </p>
+        </div>
       </template>
       <div x-show="!loading && rows.length > 0" class="space-y-2">
         <template x-for="(row, idx) in rows" :key="row.source + ':' + row.target">
