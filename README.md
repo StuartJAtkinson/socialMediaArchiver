@@ -55,7 +55,7 @@ table, with optional platform/account/date filters.
 `export` writes a static, self-contained HTML bundle (`index.html` plus a
 `media/` folder) of posts in a date range — no server or network access
 needed to view it.
-The dashboard’s **Start Archiving** button invokes the same orchestrator.
+The dashboard's **Run now** button (on the Run stage) invokes the same orchestrator.
 
 ## Configuration
 

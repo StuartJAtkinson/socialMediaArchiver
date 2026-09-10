@@ -60,8 +60,8 @@ python web.py
 ```
 
 Open <http://localhost:5000/>. The dashboard reads normalized files under
-`output/`; **Start Archiving** runs the same configured crawl in a background
-thread.
+`output/`; the **Run now** button on the Run stage kicks off the same
+configured crawl in a background thread.
 
 ## Optional credentials
 
