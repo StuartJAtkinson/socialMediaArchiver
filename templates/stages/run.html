@@ -46,14 +46,6 @@
       </div>
 
       <!-- Targets list -->
-      <template x-if="targets.length === 0">
-        <div class="panel p-5">
-          <h3 class="text-sm font-semibold text-white mb-1">No targets configured</h3>
-          <p class="text-xs" style="color:var(--muted)">
-            Add some under <a href="/configure" style="color:var(--accent)">Configure</a> first.
-          </p>
-        </div>
-      </template>
       <div class="space-y-2" x-show="targets.length > 0">
         <template x-for="t in targets" :key="t.key">
           <div class="target-row">
@@ -65,18 +57,18 @@
         </template>
       </div>
     </div>
+    <template x-if="targets.length === 0">
+      <div class="panel p-5 mb-5">
+        <h3 class="text-sm font-semibold text-white mb-1">No targets configured</h3>
+        <p class="text-xs" style="color:var(--muted)">
+          Add some under <a href="/configure" style="color:var(--accent)">Configure</a> first.
+        </p>
+      </div>
+    </template>
 
     <!-- History -->
     <div class="panel p-4">
       <h2 class="text-sm font-semibold text-white mb-3">Recent runs</h2>
-      <template x-if="history.length === 0">
-        <div class="panel p-5">
-          <h3 class="text-sm font-semibold text-white mb-1">No runs yet</h3>
-          <p class="text-xs" style="color:var(--muted)">
-            Hit <span style="color:var(--accent)">Run now</span> above to start a crawl.
-          </p>
-        </div>
-      </template>
       <div class="space-y-1" x-show="history.length > 0">
         <template x-for="h in history" :key="h.id || h.started_at">
           <div class="text-xs flex items-center gap-2" style="color:var(--muted)">
@@ -88,6 +80,14 @@
         </template>
       </div>
     </div>
+    <template x-if="history.length === 0">
+      <div class="panel p-5">
+        <h3 class="text-sm font-semibold text-white mb-1">No runs yet</h3>
+        <p class="text-xs" style="color:var(--muted)">
+          Hit <span style="color:var(--accent)">Run now</span> above to start a crawl.
+        </p>
+      </div>
+    </template>
   </div>
 </body>
 </html>
