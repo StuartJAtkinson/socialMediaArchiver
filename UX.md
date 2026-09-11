@@ -1,8 +1,8 @@
 # UX conventions
 
 What the dashboard actually does today, read off `static/base.css` and
-`templates/`. A reference, not a queue — open questions live in `STYLE.md`,
-fixable inconsistencies in `ISSUES.md`.
+`templates/`. A reference, not a queue — open questions live in
+`CONSIDERATIONS.md`, fixable inconsistencies in `ISSUES.md`.
 
 ## Stack
 
