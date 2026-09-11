@@ -167,10 +167,17 @@ button.stage-actions:disabled {
 }
 
 /* Status pills (running / error / done). */
+/* The neutral treatment lives on the base class, so a status this stylesheet
+   does not know about -- a new state, or a null -- still renders as a pill
+   rather than as bare unstyled text. `run.status` is bound raw from the API
+   (templates/index.html:54), so unknown values are always possible. */
 .status {
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 6px;
+  background: transparent;
+  color: var(--faint);
+  border: 1px solid var(--border);
 }
 
 .status.running {
@@ -191,11 +198,7 @@ button.stage-actions:disabled {
   border: 1px solid var(--status-done-border);
 }
 
-.status.idle {
-  background: transparent;
-  color: var(--faint);
-  border: 1px solid var(--border);
-}
+/* .status.idle removed -- identical to the base .status fallback above. */
 
 /* Form controls. */
 .field-label {
@@ -303,19 +306,6 @@ button.stage-actions:disabled {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.target-row .target-key {
-  color: var(--text);
-  font-size: 13px;
-  flex: 1;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
-.target-row .target-count {
-  color: var(--muted);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
 }
 
 /* Banner used by Schedule for the 'restart required' warning. */

@@ -58,6 +58,22 @@ def test_search_matches_text_and_respects_filters(tmp_path):
     idx.close()
 
 
+def test_search_pages_with_limit_and_offset(tmp_path):
+    """Browse's infinite scroll walks the result set with limit/offset."""
+    idx = PostIndex(index_path(tmp_path))
+    for n in range(3):
+        idx.record(_item(f"p{n}", timestamp=f"2026-0{n + 1}-01", text="rocket news"))
+
+    first = idx.search("rocket", limit=2, offset=0)
+    assert first["total"] == 3 and first["has_more"] is True
+    second = idx.search("rocket", limit=2, offset=2)
+    assert second["has_more"] is False and second["offset"] == 2
+    # Paging must not repeat or drop a row.
+    seen = [r["post_id"] for r in first["results"] + second["results"]]
+    assert sorted(seen) == ["p0", "p1", "p2"]
+    idx.close()
+
+
 def test_search_upsert_replaces_old_text(tmp_path):
     idx = PostIndex(index_path(tmp_path))
     idx.record(_item("one", text="original wording"))

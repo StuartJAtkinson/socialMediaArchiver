@@ -78,6 +78,13 @@ Connect, Configure, Schedule and Storage all follow this. Run is the exception:
 its "Run now" button sits top-right of the status panel, beside the state it
 acts on.
 
+Long lists page two ways, deliberately. The account page's post list uses an
+explicit `Get more posts` button; Browse's search results use infinite scroll
+(decided 2026-09-11) — an `IntersectionObserver` on a sentinel below the list,
+rooted on the stage's own scrolling region rather than the window, since the
+shell is `h-screen overflow-hidden`. Both walk the same `limit`/`offset`/
+`has_more` shape the API returns.
+
 Destructive actions are inline on the row they affect (Configure's per-target
 `Remove`). Save-style buttons swap their label while busy ("Save" → "Saving…",
 "Run now" → "Running…") rather than showing a spinner.
@@ -97,3 +104,12 @@ store it and some don't, so `handle()` in `static/js/browse.js` and the
 Emoji appear in exactly one place: the ❤️/🔄/💬 metric glyphs on post cards,
 kept deliberately because they are the only label those counts carry. Decorative
 emoji were removed everywhere else, 2026-08-23.
+
+Dates are **absolute, never relative** (standing rule, 2026-09-11). No surface
+shows "1 month ago"; every timestamp is ISO 8601 and is rendered as a date.
+Connectors resolve relative source text at ingest — see
+`_resolve_relative_timestamp` in `connectors/youtube_community.py`, which YouTube
+forces because it renders community-post dates as human text. A timestamp
+derived that way carries `timestamp_estimated=True`, because "1 month ago" is a
+month-wide claim; an unparseable one is stored empty rather than guessed. The
+raw source string is kept in `Item.raw`.

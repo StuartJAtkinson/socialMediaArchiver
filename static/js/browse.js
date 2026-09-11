@@ -13,6 +13,9 @@ function page() {
     searched: false,
     searching: false,
     searchError: '',
+    searchLimit: 20,
+    searchOffset: 0,
+    hasMore: false,
     filters: { platform: '', account: '', since: '', until: '' },
     exporting: false,
     exportMsg: '',
@@ -27,6 +30,15 @@ function page() {
     async init() {
       await this._sync();
       this._timer = setInterval(() => this._sync(), 5000);
+      // Infinite scroll: the sentinel sits below the results list and is
+      // display:none until there are results, so it can only intersect once
+      // the user has scrolled to the bottom of a non-empty list.
+      this.$nextTick(() => {
+        new IntersectionObserver(
+          entries => { if (entries[0].isIntersecting) this.moreResults(); },
+          { root: this.$refs.scroller, rootMargin: '200px' }
+        ).observe(this.$refs.sentinel);
+      });
     },
     async _sync() {
       try {
@@ -41,13 +53,29 @@ function page() {
     },
     async search() {
       const q = this.query.trim();
-      if (!q) { this.results = []; this.searched = false; return; }
+      if (!q) { this.results = []; this.searched = false; this.hasMore = false; return; }
+      await this._fetchResults(0);
+    },
+    // Called by the scroll sentinel; a no-op unless there is another page.
+    async moreResults() {
+      if (this.searching || !this.hasMore) return;
+      await this._fetchResults(this.searchOffset + this.searchLimit);
+    },
+    async _fetchResults(offset) {
       this.searching = true;
       try {
-        const params = new URLSearchParams({ q, ...this._activeFilters() });
+        const params = new URLSearchParams({
+          q: this.query.trim(),
+          limit: this.searchLimit,
+          offset,
+          ...this._activeFilters(),
+        });
         const data = await fetch('/api/search?' + params).then(r => r.json());
-        this.results = data.results || [];
+        const page = data.results || [];
+        this.results = offset === 0 ? page : this.results.concat(page);
         this.searchTotal = data.total || 0;
+        this.searchOffset = data.offset ?? offset;
+        this.hasMore = !!data.has_more;
         // Without this, "no index yet" reads as an honest "0 matches".
         this.searchError = data.error || '';
         this.searched = true;

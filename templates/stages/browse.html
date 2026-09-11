@@ -6,7 +6,7 @@
   <title>Browse — Social Media Archiver</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/base.css" />
-  <script defer src="/static/js/browse.js?v=4"></script>
+  <script defer src="/static/js/browse.js?v=5"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
@@ -14,7 +14,7 @@
     {% include "_nav.html" %}
   {% endwith %}
 
-  <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
+  <div class="flex-1 overflow-auto px-4 pt-6 pb-8" x-ref="scroller">
     <div class="stage-header mb-5">
       <h1>Browse</h1>
       <p>Browse everything you've already archived.</p>
@@ -65,7 +65,7 @@
                 :disabled="exporting" x-text="exporting ? 'Exporting…' : 'Export these results'"></button>
       </div>
       <p class="field-error mt-2" x-show="searchError" x-text="searchError"></p>
-      <template x-if="searched && !searching && !searchError">
+      <template x-if="searched && !searchError">
         <p class="text-xs mt-2" style="color:var(--faint)" x-text="results.length + ' of ' + searchTotal + ' match(es)'"></p>
       </template>
       <template x-if="exportMsg">
@@ -79,6 +79,10 @@
           </a>
         </template>
       </div>
+      <!-- Infinite-scroll sentinel: hidden until there are results, so it can
+           only come into view at the bottom of a non-empty list. -->
+      <div x-ref="sentinel" x-show="results.length > 0" class="text-xs mt-2" style="color:var(--faint)"
+           x-text="searching ? 'Loading more…' : (hasMore ? '' : 'End of results')"></div>
     </div>
 
     <h2 class="text-sm font-semibold text-white mb-2">Archived accounts</h2>
