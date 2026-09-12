@@ -8,6 +8,7 @@ Subcommands:
   reindex          Rebuild index.db from the normalized JSON output alone.
   search QUERY     Full-text search over archived post text.
   export           Export a date range as a static, self-contained HTML bundle.
+  backfill-dates   Rewrite pre-fix relative timestamps in the archive as ISO 8601.
 
 Replaces the old single-purpose ``scraper.py`` main. Generic plumbing now lives in
 ``core/`` and each source is a connector under ``connectors/``.
@@ -24,6 +25,7 @@ from typing import Optional
 
 import yaml
 
+from core.backfill import backfill_relative_dates
 from core.checkpoint import Checkpoint
 from core import orchestrator
 from core.export import export_range
@@ -107,6 +109,20 @@ def cmd_reindex(cfg: dict) -> None:
     logger.info("Rebuilt index at %s (%d posts).", Path(output_dir) / "index.db", count)
 
 
+def cmd_backfill_dates(cfg: dict, args: argparse.Namespace) -> None:
+    """Rewrite pre-fix relative timestamps as ISO 8601, then rebuild the index."""
+    output_dir = (cfg.get("storage", {}) or {}).get("output_dir", cfg.get("output_dir", "./output"))
+    summary = backfill_relative_dates(output_dir, dry_run=args.dry_run)
+    verb = "would date" if args.dry_run else "dated"
+    logger.info(
+        "Backfill %s %d post(s) across %d account(s); %d unresolved.",
+        verb, summary["updated"], summary["accounts"], summary["unresolved"],
+    )
+    # The index stores posted_at, so it is stale the moment the JSON changes.
+    if summary["updated"] and not args.dry_run:
+        cmd_reindex(cfg)
+
+
 def cmd_export(cfg: dict, args: argparse.Namespace) -> None:
     """Export a date range as a static, self-contained HTML bundle."""
     if not args.output:
@@ -173,7 +189,8 @@ def main() -> None:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("command", nargs="?", default="crawl",
-                        choices=["crawl", "status", "resume", "reindex", "search", "export"],
+                        choices=["crawl", "status", "resume", "reindex", "search", "export",
+                                 "backfill-dates"],
                         help="What to do (default: crawl).")
     parser.add_argument("query", nargs="?", default="",
                         help="Search text (only used by the 'search' command).")
@@ -184,6 +201,8 @@ def main() -> None:
     parser.add_argument("--since", help="Filter search/export results to posted_at >= this ISO date.")
     parser.add_argument("--until", help="Filter search/export results to posted_at <= this ISO date.")
     parser.add_argument("--output", help="Destination directory for 'export' (created if missing).")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="For 'backfill-dates': report what would change, write nothing.")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--log-file")
@@ -218,6 +237,8 @@ def main() -> None:
         cmd_search(cfg, args)
     elif args.command == "export":
         cmd_export(cfg, args)
+    elif args.command == "backfill-dates":
+        cmd_backfill_dates(cfg, args)
     else:
         cmd_crawl(cfg, args.targets)
 

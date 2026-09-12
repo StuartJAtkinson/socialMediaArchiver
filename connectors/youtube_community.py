@@ -85,9 +85,12 @@ _UNIT_DAYS = {
     "year": 365.2425,
 }
 
+# YouTube marks an edited post either as an "Edited " prefix or a trailing
+# "(edited)" — both forms appear in the archive, so accept either.
 _RELATIVE_RE = re.compile(
     r"^\s*(?:edited\s+)?(\d+|a|an|one)\s+"
-    r"(second|minute|hour|day|week|month|year)s?\s+ago\s*$",
+    r"(second|minute|hour|day|week|month|year)s?\s+ago"
+    r"(?:\s*\(edited\))?\s*$",
     re.IGNORECASE,
 )
 
