@@ -59,8 +59,8 @@ needed to view it.
 `backfill-dates` rewrites relative `posted_at` strings left in the archive by
 pre-fix connectors (e.g. YouTube Community's `"1 month ago"`) as ISO 8601,
 spreading tied runs across the nearest confirmed dates either side and
-marking each rewritten row `timestamp_estimated=True`. Pair it with
-`reindex` if you skip the auto-reindex it triggers.
+marking each rewritten row `timestamp_estimated=True`. It auto-reindexes
+after a real run, so `index.db` reflects the new timestamps.
 The dashboard's **Run now** button (on the Run stage) invokes the same orchestrator.
 
 ## Configuration
