@@ -39,12 +39,13 @@ On Linux/macOS, activate with `. .venv/bin/activate`. `python setup.py`,
 ## CLI
 
 ```text
-python main.py crawl    [--config FILE] [--targets FILE] [--verbose]
-python main.py status   [--config FILE]
-python main.py resume   [--config FILE]
-python main.py reindex  [--config FILE]
+python main.py crawl            [--config FILE] [--targets FILE] [--verbose]
+python main.py status           [--config FILE]
+python main.py resume           [--config FILE]
+python main.py reindex          [--config FILE]
 python main.py search "<query>" [--platform P] [--account A] [--since DATE] [--until DATE]
 python main.py export --output DIR [--platform P] [--account A] [--since DATE] [--until DATE]
+python main.py backfill-dates   [--config FILE] [--dry-run]
 ```
 
 `resume` clears the checkpoint so the next crawl starts from the beginning.
@@ -55,6 +56,11 @@ table, with optional platform/account/date filters.
 `export` writes a static, self-contained HTML bundle (`index.html` plus a
 `media/` folder) of posts in a date range — no server or network access
 needed to view it.
+`backfill-dates` rewrites relative `posted_at` strings left in the archive by
+pre-fix connectors (e.g. YouTube Community's `"1 month ago"`) as ISO 8601,
+spreading tied runs across the nearest confirmed dates either side and
+marking each rewritten row `timestamp_estimated=True`. Pair it with
+`reindex` if you skip the auto-reindex it triggers.
 The dashboard's **Run now** button (on the Run stage) invokes the same orchestrator.
 
 ## Configuration

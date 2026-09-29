@@ -28,6 +28,12 @@ optional S3-compatible mirroring.
 - [x] Per-source rate-limit backoff persisted to `.rate_backoff.json`, shared
       across scheduled runs
 - [x] Media deduplication by content hash across accounts and sources
+- [x] One-off backfill for archived posts that still hold relative
+      `posted_at` strings (e.g. pre-fix YouTube Community posts): rewrites
+      them as ISO 8601 against the row's own crawl time, spreads tied runs
+      across the nearest confirmed dates either side, marks every rewrite
+      `timestamp_estimated=True`. Run via `python main.py backfill-dates`
+      (`--dry-run` to preview); it reindexes on a real run.
 
 ## Operational requirements
 
@@ -58,4 +64,4 @@ python main.py --help
 python web.py
 ```
 
-Last refreshed: 2026-08-31.
+Last refreshed: 2026-09-29.
