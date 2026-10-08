@@ -1,5 +1,14 @@
 # Roadmap
 
+> **Auto Continue reads this file.** The `feature` phase takes the first unchecked
+> `- [ ]` line below as its whole brief and ticks it by exact text, so milestones and
+> phases are headings and every slice is one commit-sized, self-contained line.
+> **Human-only** items carry no checkbox, so Auto never picks them up.
+
+**Now:** no milestone queued — Foundation, Consolidation, Storage, Next and Later are
+shipped. Reviewed 2026-10-09: the next use of the archive is timelinize's import of it
+(timelinize ROADMAP M2), built there, not here.
+
 ## Foundation ✅
 
 - [x] Twitter/Nitter archive and Flask dashboard
