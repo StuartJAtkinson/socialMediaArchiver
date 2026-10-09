@@ -32,7 +32,7 @@
       </div>
       <template x-if="active && draft[active]">
         <div>
-          <h2 class="text-sm font-semibold text-white mb-1" x-text="active"></h2>
+          <h2 class="text-sm font-semibold text-heading mb-1" x-text="active"></h2>
           <p class="field-hint mb-4" x-text="hint(active)"></p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <template x-for="(value, key) in draft[active]" :key="key">

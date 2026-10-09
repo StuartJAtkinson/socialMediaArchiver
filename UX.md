@@ -12,12 +12,12 @@ component and every colour, Alpine 3 from jsDelivr for behaviour. No build step.
 
 Tailwind is used for layout and spacing (`flex`, `grid`, `gap-*`, `p-*`,
 `mb-*`, `text-xs`). Colour comes from a CSS variable, through a component class
-or an inline `style="color:var(--…)"` — the one exception is `text-white` on
-panel headings, which is logged as drift in `ISSUES.md`.
+or an inline `style="color:var(--…)"`. Panel and empty-state headings use the
+`.text-heading` class, never Tailwind's `text-white`.
 
 ## Colour tokens
 
-All defined in `:root` at `static/base.css:4-28`. Nothing outside this list is
+All defined in `:root` at the top of `static/base.css`. Nothing outside this list is
 a sanctioned colour.
 
 | Token | Value | Used for |
@@ -27,7 +27,9 @@ a sanctioned colour.
 | `--panel` | `#1a1d27` | raised surfaces — cards, panels, the nav |
 | `--border` | `#2d3148` | standard 1px border |
 | `--border-soft` | `#1e2030` | internal dividers inside a panel |
-| `--text` | `#e2e8f0` | body text |
+| `--panel-hover` / `--border-hover` | `#1c1f2b` / `#414660` | hovered account card and post card |
+| `--heading` | `#fff` | `h1`, panel and card headings, hovered button text |
+| `--text` | `#e2e8f0` | body text, including archived post text |
 | `--muted` | `#94a3b8` | labels, secondary text |
 | `--faint` | `#64748b` | hints, timestamps, empty-state text |
 | `--accent` | `#818cf8` | inline links |

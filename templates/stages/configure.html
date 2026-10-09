@@ -23,7 +23,7 @@
     <!-- Existing targets -->
     <div class="panel p-4 mb-5">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-semibold text-white">Targets</h2>
+        <h2 class="text-sm font-semibold text-heading">Targets</h2>
         <span class="text-xs" style="color:var(--muted)" x-text="rows.length + ' row(s)'"></span>
       </div>
       <template x-if="loading">
@@ -41,7 +41,7 @@
     </div>
     <template x-if="!loading && rows.length === 0">
       <div class="panel p-5 mb-5">
-        <h3 class="text-sm font-semibold text-white mb-1">No targets yet</h3>
+        <h3 class="text-sm font-semibold text-heading mb-1">No targets yet</h3>
         <p class="text-xs" style="color:var(--muted)">
           Add one below — pick a source and a handle, feed URL, subreddit, or channel id.
         </p>
@@ -50,7 +50,7 @@
 
     <!-- Add row form -->
     <div class="panel p-4">
-      <h2 class="text-sm font-semibold text-white mb-3">Add target</h2>
+      <h2 class="text-sm font-semibold text-heading mb-3">Add target</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label class="field-label">Source</label>

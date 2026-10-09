@@ -25,7 +25,7 @@
       <div class="flex items-center justify-between mb-3">
         <div>
           <span class="text-xs" style="color:var(--muted)">Status</span>
-          <h2 class="text-sm font-semibold text-white">
+          <h2 class="text-sm font-semibold text-heading">
             <span class="status"
                   :class="phaseClass(phase)"
                   x-text="phase || 'idle'"></span>
@@ -59,7 +59,7 @@
     </div>
     <template x-if="targets.length === 0">
       <div class="panel p-5 mb-5">
-        <h3 class="text-sm font-semibold text-white mb-1">No targets configured</h3>
+        <h3 class="text-sm font-semibold text-heading mb-1">No targets configured</h3>
         <p class="text-xs" style="color:var(--muted)">
           Add some under <a href="/configure" style="color:var(--accent)">Configure</a> first.
         </p>
@@ -68,7 +68,7 @@
 
     <!-- History -->
     <div class="panel p-4">
-      <h2 class="text-sm font-semibold text-white mb-3">Recent runs</h2>
+      <h2 class="text-sm font-semibold text-heading mb-3">Recent runs</h2>
       <div class="space-y-1" x-show="history.length > 0">
         <template x-for="h in history" :key="h.id || h.started_at">
           <div class="text-xs flex items-center gap-2" style="color:var(--muted)">
@@ -82,7 +82,7 @@
     </div>
     <template x-if="history.length === 0">
       <div class="panel p-5">
-        <h3 class="text-sm font-semibold text-white mb-1">No runs yet</h3>
+        <h3 class="text-sm font-semibold text-heading mb-1">No runs yet</h3>
         <p class="text-xs" style="color:var(--muted)">
           Hit <span style="color:var(--accent)">Run now</span> above to start a crawl.
         </p>

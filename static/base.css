@@ -8,6 +8,9 @@
   --panel: #1a1d27;
   --border: #2d3148;
   --border-soft: #1e2030;
+  --panel-hover: #1c1f2b;
+  --border-hover: #414660;
+  --heading: #fff;
   --text: #e2e8f0;
   --muted: #94a3b8;
   --faint: #64748b;
@@ -92,7 +95,7 @@ button.stage-actions {
 a.stage-actions:hover,
 button.stage-actions:hover {
   background: var(--accent-bg-hover);
-  color: #fff;
+  color: var(--heading);
 }
 
 .stage-actions a:disabled,
@@ -108,7 +111,7 @@ button.stage-actions:disabled {
 
 /* Per-stage intro header. */
 .stage-header h1 {
-  color: #fff;
+  color: var(--heading);
   font-size: 18px;
   font-weight: 700;
   margin: 0;
@@ -253,8 +256,8 @@ button.stage-actions:disabled {
 }
 
 .account-card:hover {
-  background: #1c1f2b;
-  border-color: #414660;
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
 }
 
 .account-card .platform {
@@ -269,7 +272,7 @@ button.stage-actions:disabled {
 }
 
 .account-card h3 {
-  color: #fff;
+  color: var(--heading);
   font-size: 14px;
   font-weight: 600;
   margin: 6px 0 2px;
@@ -294,7 +297,7 @@ button.stage-actions:disabled {
 
 .account-card a.view-btn:hover {
   background: var(--accent-bg-hover);
-  color: #fff;
+  color: var(--heading);
 }
 
 /* Per-target row in the Run tab. */
@@ -349,8 +352,8 @@ button.stage-actions:disabled {
 }
 
 .post:hover {
-  background: #1c1f2b;
-  border-color: #414660;
+  background: var(--panel-hover);
+  border-color: var(--border-hover);
 }
 
 .post-header {
@@ -383,7 +386,7 @@ button.stage-actions:disabled {
 }
 
 .post-text {
-  color: #cbd5e1;
+  color: var(--text);
   font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -411,3 +414,6 @@ button.stage-actions:disabled {
   color: var(--muted);
   font-size: 11px;
 }
+
+/* Panel / empty-state headings (replaces Tailwind's text-white). */
+.text-heading { color: var(--heading); }

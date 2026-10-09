@@ -23,7 +23,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <!-- Status pills -->
       <div class="panel p-4">
-        <h2 class="text-sm font-semibold text-white mb-3">Current state</h2>
+        <h2 class="text-sm font-semibold text-heading mb-3">Current state</h2>
         <div class="space-y-3 text-xs">
           <div class="flex items-center justify-between">
             <span style="color:var(--muted)">In YAML</span>
@@ -46,7 +46,7 @@
 
       <!-- Editor -->
       <div class="panel p-4 md:col-span-2">
-        <h2 class="text-sm font-semibold text-white mb-3">Edit YAML</h2>
+        <h2 class="text-sm font-semibold text-heading mb-3">Edit YAML</h2>
         <label class="field-label">Interval (minutes)</label>
         <input type="number" min="0" step="1" class="field-input"
                x-model.number="draft" />
@@ -65,7 +65,7 @@
     </div>
     <template x-if="!restartNeeded && activeValue === 0">
       <div class="panel p-5 mt-4">
-        <h3 class="text-sm font-semibold text-white mb-1">Scheduling is disabled</h3>
+        <h3 class="text-sm font-semibold text-heading mb-1">Scheduling is disabled</h3>
         <p class="text-xs" style="color:var(--muted)">
           Interval is set to 0. Set it above and restart the dashboard to start scheduled crawls.
         </p>
