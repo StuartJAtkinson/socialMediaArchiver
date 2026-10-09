@@ -20,16 +20,16 @@
       <p>Provide API tokens and connector options. Environment variables still win at runtime — YAML values are fallbacks.</p>
     </div>
 
-    <!-- Source tabs -->
-    <div class="source-tabs flex flex-wrap mb-5">
-      <template x-for="s in sources" :key="s">
-        <button @click="active = s"
-                :class="active === s ? 'active' : ''"
-                x-text="s"></button>
-      </template>
-    </div>
-
+    <!-- Source tabs: inside the panel under a field label, same as Storage's backend selector. -->
     <div class="panel p-4">
+      <label class="field-label">Source</label>
+      <div class="source-tabs flex flex-wrap mb-5">
+        <template x-for="s in sources" :key="s">
+          <button @click="active = s"
+                  :class="active === s ? 'active' : ''"
+                  x-text="s"></button>
+        </template>
+      </div>
       <template x-if="active && draft[active]">
         <div>
           <h2 class="text-sm font-semibold text-white mb-1" x-text="active"></h2>
