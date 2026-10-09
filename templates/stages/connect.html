@@ -10,9 +10,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="flex flex-col h-screen overflow-hidden" x-data="page()" x-init="init()" x-cloak>
-  {% with stage_actions = '' %}
-    {% include "_nav.html" %}
-  {% endwith %}
+  {% include "_nav.html" %}
 
   <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
     <div class="stage-header mb-5">

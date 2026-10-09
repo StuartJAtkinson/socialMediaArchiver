@@ -12,9 +12,7 @@
 <body class="flex flex-col h-screen overflow-hidden"
       x-data="page()" x-init="init()" x-cloak
       data-platform="{{ platform }}" data-account="{{ account }}">
-  {% with stage_actions = '' %}
-    {% include "_nav.html" %}
-  {% endwith %}
+  {% include "_nav.html" %}
 
   <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
     <div class="stage-header mb-5">
