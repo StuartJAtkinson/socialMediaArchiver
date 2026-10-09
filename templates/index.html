@@ -43,13 +43,13 @@
       <div class="panel p-4 lg:col-span-2">
         <h2 class="panel-title">Recent runs</h2>
         <template x-if="recent.length === 0">
-          <p class="text-xs" style="color:var(--faint)">No runs yet. Go to <a href="/run" style="color:var(--accent)">Run</a> to start one.</p>
+          <p class="text-faint text-xs">No runs yet. Go to <a class="link" href="/run">Run</a> to start one.</p>
         </template>
         <template x-for="run in recent" :key="run.id">
           <div class="flex items-center justify-between py-1.5 border-b" style="border-color:var(--border-soft)">
             <div>
               <div class="text-xs" style="color:var(--text)" x-text="run.id.slice(0,8)"></div>
-              <div class="text-xs" style="color:var(--faint)" x-text="fmt(run.started_at) + ' · ' + run.trigger"></div>
+              <div class="text-faint text-xs" x-text="fmt(run.started_at) + ' · ' + run.trigger"></div>
             </div>
             <span class="status" :class="run.status" x-text="run.status"></span>
           </div>
@@ -58,13 +58,13 @@
 
       <div class="panel p-4">
         <h2 class="panel-title">Quick links</h2>
-        <ul class="text-xs space-y-1.5" style="color:var(--muted)">
-          <li><a href="/connect" style="color:var(--accent)">Connect</a> — credentials per source</li>
-          <li><a href="/configure" style="color:var(--accent)">Configure</a> — what to archive</li>
-          <li><a href="/storage" style="color:var(--accent)">Storage</a> — where it lives</li>
-          <li><a href="/schedule" style="color:var(--accent)">Schedule</a> — periodic crawls</li>
-          <li><a href="/run" style="color:var(--accent)">Run</a> — start a crawl</li>
-          <li><a href="/browse" style="color:var(--accent)">Browse</a> — read what you have</li>
+        <ul class="text-muted text-xs space-y-1.5">
+          <li><a class="link" href="/connect">Connect</a> — credentials per source</li>
+          <li><a class="link" href="/configure">Configure</a> — what to archive</li>
+          <li><a class="link" href="/storage">Storage</a> — where it lives</li>
+          <li><a class="link" href="/schedule">Schedule</a> — periodic crawls</li>
+          <li><a class="link" href="/run">Run</a> — start a crawl</li>
+          <li><a class="link" href="/browse">Browse</a> — read what you have</li>
         </ul>
       </div>
     </div>

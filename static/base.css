@@ -123,6 +123,11 @@ button.stage-actions:disabled {
   margin-top: 2px;
 }
 
+/* Text colour helpers -- use these instead of inline style="color:var(--…)". */
+.text-faint { color: var(--faint); }
+.text-muted { color: var(--muted); }
+.link { color: var(--accent); }
+
 /* Panel section heading -- one size, colour and bottom margin everywhere. */
 .panel-title {
   color: var(--heading);

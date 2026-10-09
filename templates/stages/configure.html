@@ -24,10 +24,10 @@
     <div class="panel p-4 mb-5">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-sm font-semibold text-heading">Targets</h2>
-        <span class="text-xs" style="color:var(--muted)" x-text="rows.length + ' row(s)'"></span>
+        <span class="text-muted text-xs" x-text="rows.length + ' row(s)'"></span>
       </div>
       <template x-if="loading">
-        <p class="text-xs" style="color:var(--faint)">Loading…</p>
+        <p class="text-faint text-xs">Loading…</p>
       </template>
       <div x-show="!loading && rows.length > 0" class="space-y-2">
         <template x-for="(row, idx) in rows" :key="row.source + ':' + row.target">
@@ -42,7 +42,7 @@
     <template x-if="!loading && rows.length === 0">
       <div class="panel p-5 mb-5">
         <h3 class="text-sm font-semibold text-heading mb-1">No targets yet</h3>
-        <p class="text-xs" style="color:var(--muted)">
+        <p class="text-muted text-xs">
           Add one below — pick a source and a handle, feed URL, subreddit, or channel id.
         </p>
       </div>
@@ -67,7 +67,7 @@
                  placeholder="@handle | r/sub | feed URL | channel id" />
         </div>
       </div>
-      <p class="field-hint">Twitter/Facebook may need credentials configured under <a href="/connect" style="color:var(--accent)">Connect</a> before they will crawl.</p>
+      <p class="field-hint">Twitter/Facebook may need credentials configured under <a class="link" href="/connect">Connect</a> before they will crawl.</p>
       <div class="flex items-center gap-3 mt-4">
         <button @click="add()" :disabled="busy || !canAdd" class="stage-actions">
           <span x-show="!busy">Add</span>

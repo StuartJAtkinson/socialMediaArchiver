@@ -24,13 +24,13 @@
     <div class="panel p-4 mb-5">
       <div class="flex items-center justify-between mb-3">
         <div>
-          <span class="text-xs" style="color:var(--muted)">Status</span>
+          <span class="text-muted text-xs">Status</span>
           <h2 class="text-sm font-semibold text-heading">
             <span class="status"
                   :class="phaseClass(phase)"
                   x-text="phase || 'idle'"></span>
           </h2>
-          <p class="text-xs mt-1" style="color:var(--faint)" x-show="started_at">
+          <p class="text-faint text-xs mt-1" x-show="started_at">
             Started <span x-text="fmt(started_at)"></span>
             <span x-show="trigger"> · trigger <span x-text="trigger"></span></span>
             <span x-show="finished_at"> · finished <span x-text="fmt(finished_at)"></span></span>
@@ -60,8 +60,8 @@
     <template x-if="targets.length === 0">
       <div class="panel p-5 mb-5">
         <h3 class="text-sm font-semibold text-heading mb-1">No targets configured</h3>
-        <p class="text-xs" style="color:var(--muted)">
-          Add some under <a href="/configure" style="color:var(--accent)">Configure</a> first.
+        <p class="text-muted text-xs">
+          Add some under <a class="link" href="/configure">Configure</a> first.
         </p>
       </div>
     </template>
@@ -71,7 +71,7 @@
       <h2 class="panel-title">Recent runs</h2>
       <div class="space-y-1" x-show="history.length > 0">
         <template x-for="h in history" :key="h.id || h.started_at">
-          <div class="text-xs flex items-center gap-2" style="color:var(--muted)">
+          <div class="text-muted text-xs flex items-center gap-2">
             <span class="status idle" x-text="h.status || 'unknown'"></span>
             <span x-text="h.trigger || 'manual'"></span>
             <span class="flex-1" x-text="fmt(h.started_at)"></span>
@@ -83,8 +83,8 @@
     <template x-if="history.length === 0">
       <div class="panel p-5">
         <h3 class="text-sm font-semibold text-heading mb-1">No runs yet</h3>
-        <p class="text-xs" style="color:var(--muted)">
-          Hit <span style="color:var(--accent)">Run now</span> above to start a crawl.
+        <p class="text-muted text-xs">
+          Hit <span class="link">Run now</span> above to start a crawl.
         </p>
       </div>
     </template>

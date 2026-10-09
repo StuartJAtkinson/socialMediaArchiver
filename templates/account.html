@@ -21,7 +21,7 @@
       <!-- Some sources already store the leading @; don't render "@@name".
            Anything with a '/' (r/sub, feed URL) isn't a handle: show it verbatim. -->
       <h1>{{ account if '/' in account else '@' ~ account.lstrip('@') }}</h1>
-      <p>{{ platform }} · <a href="/browse" style="color:var(--accent)">back to Browse</a></p>
+      <p>{{ platform }} · <a class="link" href="/browse">back to Browse</a></p>
     </div>
 
     {% if stats.error %}
@@ -84,14 +84,14 @@
     </div>
 
     <template x-if="loading">
-      <p class="text-xs mt-3" style="color:var(--faint)">Loading posts…</p>
+      <p class="text-faint text-xs mt-3">Loading posts…</p>
     </template>
     <template x-if="!loading && posts.length === 0 && !errorMsg">
       <div class="panel p-5">
         <h3 class="text-sm font-semibold text-heading mb-1">No posts found</h3>
-        <p class="text-xs" style="color:var(--muted)">
+        <p class="text-muted text-xs">
           This account hasn't been archived yet. Start a crawl from
-          <a href="/run" style="color:var(--accent)">Run</a>.
+          <a class="link" href="/run">Run</a>.
         </p>
       </div>
     </template>

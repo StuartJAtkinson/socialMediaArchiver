@@ -12,7 +12,7 @@ component and every colour, Alpine 3 from jsDelivr for behaviour. No build step.
 
 Tailwind is used for layout and spacing (`flex`, `grid`, `gap-*`, `p-*`,
 `mb-*`, `text-xs`). Colour comes from a CSS variable, through a component class
-or an inline `style="color:var(--…)"`. Panel and empty-state headings use the
+or the `.text-faint` / `.text-muted` / `.link` helpers in `base.css`. Panel and empty-state headings use the
 `.text-heading` class, never Tailwind's `text-white`.
 
 ## Colour tokens

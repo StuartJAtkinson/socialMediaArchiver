@@ -66,36 +66,36 @@
       </div>
       <p class="field-error mt-2" x-show="searchError" x-text="searchError"></p>
       <template x-if="searched && !searchError">
-        <p class="text-xs mt-2" style="color:var(--faint)" x-text="results.length + ' of ' + searchTotal + ' match(es)'"></p>
+        <p class="text-faint text-xs mt-2" x-text="results.length + ' of ' + searchTotal + ' match(es)'"></p>
       </template>
       <template x-if="exportMsg">
-        <p class="text-xs mt-2" style="color:var(--faint)" x-text="exportMsg"></p>
+        <p class="text-faint text-xs mt-2" x-text="exportMsg"></p>
       </template>
       <div class="mt-2 space-y-1.5" x-show="results.length > 0">
         <template x-for="r in results" :key="r.platform + ':' + r.post_id">
           <a :href="'/account/' + r.platform + '/' + r.account + '#post-' + r.post_id" class="block panel-band p-2 text-xs" style="text-decoration:none;color:var(--text)">
-            <span style="color:var(--faint)" x-text="'[' + r.platform + '] ' + handle(r.account) + '  ' + (r.posted_at || '')"></span>
+            <span class="text-faint" x-text="'[' + r.platform + '] ' + handle(r.account) + '  ' + (r.posted_at || '')"></span>
             <div x-text="r.snippet"></div>
           </a>
         </template>
       </div>
       <!-- Infinite-scroll sentinel: hidden until there are results, so it can
            only come into view at the bottom of a non-empty list. -->
-      <div x-ref="sentinel" x-show="results.length > 0" class="text-xs mt-2" style="color:var(--faint)"
+      <div x-ref="sentinel" x-show="results.length > 0" class="text-faint text-xs mt-2"
            x-text="searching ? 'Loading more…' : (hasMore ? '' : 'End of results')"></div>
     </div>
 
     <h2 class="panel-title">Archived accounts</h2>
     <div id="accounts-container">
       <template x-if="loading">
-        <p class="text-xs" style="color:var(--faint)">Loading accounts…</p>
+        <p class="text-faint text-xs">Loading accounts…</p>
       </template>
       <template x-if="!loading && accounts.length === 0">
         <div class="panel p-5">
           <h3 class="text-sm font-semibold text-heading mb-1">No archived accounts yet</h3>
-          <p class="text-xs" style="color:var(--muted)">
-            Head to <a href="/run" style="color:var(--accent)">Run</a> to start a crawl,
-            or <a href="/configure" style="color:var(--accent)">Configure</a> to pick what to archive.
+          <p class="text-muted text-xs">
+            Head to <a class="link" href="/run">Run</a> to start a crawl,
+            or <a class="link" href="/configure">Configure</a> to pick what to archive.
           </p>
         </div>
       </template>
