@@ -18,8 +18,9 @@
 
   <div class="flex-1 overflow-auto px-4 pt-6 pb-8">
     <div class="stage-header mb-5">
-      <!-- Some sources already store the leading @; don't render "@@name". -->
-      <h1>{{ '@' ~ account.lstrip('@') }}</h1>
+      <!-- Some sources already store the leading @; don't render "@@name".
+           Anything with a '/' (r/sub, feed URL) isn't a handle: show it verbatim. -->
+      <h1>{{ account if '/' in account else '@' ~ account.lstrip('@') }}</h1>
       <p>{{ platform }} · <a href="/browse" style="color:var(--accent)">back to Browse</a></p>
     </div>
 

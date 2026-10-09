@@ -101,7 +101,8 @@ configured `{source, target}` pair is a "target"; a completed crawl is a "run".
 
 Account handles are rendered with exactly one leading `@` — some connectors
 store it and some don't, so `handle()` in `static/js/browse.js` and the
-`lstrip('@')` in `account.html` normalise it.
+`lstrip('@')` in `account.html` normalise it. Anything containing a `/` (a
+subreddit `r/…`, a feed URL) is not a handle and is shown verbatim, no `@`.
 
 Emoji appear in exactly one place: the ❤️/🔄/💬 metric glyphs on post cards,
 kept deliberately because they are the only label those counts carry. Decorative

@@ -21,8 +21,10 @@ function page() {
     exportMsg: '',
     _timer: null,
     // Some sources already store the leading @; don't render "@@name".
+    // Anything with a '/' (r/sub, feed URL) isn't a handle: show it verbatim.
     handle(name) {
-      return String(name || '').startsWith('@') ? name : '@' + name;
+      const s = String(name || '');
+      return s.startsWith('@') || s.includes('/') ? s : '@' + s;
     },
     get platforms() {
       return [...new Set(this.accounts.map(a => a.platform))].sort();
