@@ -41,7 +41,7 @@
     </div>
 
     <div class="panel p-4 mb-5">
-      <h2 class="text-sm font-semibold text-heading mb-2">Search</h2>
+      <h2 class="panel-title">Search</h2>
       <div class="flex gap-2">
         <input type="text" class="field-input" placeholder="Search archived post text…"
                x-model="query" @keyup.enter="search()" style="max-width:360px" />
@@ -85,7 +85,7 @@
            x-text="searching ? 'Loading more…' : (hasMore ? '' : 'End of results')"></div>
     </div>
 
-    <h2 class="text-sm font-semibold text-heading mb-2">Archived accounts</h2>
+    <h2 class="panel-title">Archived accounts</h2>
     <div id="accounts-container">
       <template x-if="loading">
         <p class="text-xs" style="color:var(--faint)">Loading accounts…</p>

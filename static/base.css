@@ -123,6 +123,15 @@ button.stage-actions:disabled {
   margin-top: 2px;
 }
 
+/* Panel section heading -- one size, colour and bottom margin everywhere. */
+.panel-title {
+  color: var(--heading);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
 /* Reusable card / panel surfaces. */
 .panel {
   background: var(--panel);

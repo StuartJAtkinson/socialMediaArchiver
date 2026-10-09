@@ -68,7 +68,7 @@
 
     <!-- History -->
     <div class="panel p-4">
-      <h2 class="text-sm font-semibold text-heading mb-3">Recent runs</h2>
+      <h2 class="panel-title">Recent runs</h2>
       <div class="space-y-1" x-show="history.length > 0">
         <template x-for="h in history" :key="h.id || h.started_at">
           <div class="text-xs flex items-center gap-2" style="color:var(--muted)">

@@ -64,6 +64,9 @@ that region are separated by `mb-5`; panels sit at `p-4`, empty-state panels at
 - **`.stage-header`** — every page opens with an 18px white `h1` and a 12px
   faint one-line description of what the stage is for.
 - **`.panel` / `.panel-band`** — raised and recessed card surfaces.
+- **`.panel-title`** — every panel's `h2`: 14px semibold `--heading`, 12px
+  below. The two headings that share a flex row with a count or button
+  (Configure's Targets, Run's status) keep the longhand with no margin.
 - **`.status`** with `.running` / `.error` / `.done` — pills. The neutral look
   is the base class itself (`.idle` is no longer styled; templates still add it
   harmlessly), so an unknown status still renders as a pill. Also
