@@ -52,11 +52,11 @@
       </template>
 
       <div class="flex items-center gap-3 mt-4">
-        <button @click="save()" :disabled="busy" class="stage-actions" style="cursor:pointer">
+        <button @click="save()" :disabled="busy" class="stage-actions">
           <span x-show="!busy">Save</span>
           <span x-show="busy">Saving…</span>
         </button>
-        <button @click="reload()" class="stage-actions" style="cursor:pointer">Reload</button>
+        <button @click="reload()" class="stage-actions">Reload</button>
         <span class="field-success" x-show="okMsg" x-text="okMsg"></span>
         <span class="field-error" x-show="errorMsg" x-text="errorMsg"></span>
       </div>

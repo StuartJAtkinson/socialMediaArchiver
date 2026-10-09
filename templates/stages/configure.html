@@ -34,7 +34,7 @@
           <div class="target-row">
             <span class="status idle" x-text="row.source"></span>
             <span class="flex-1 font-mono text-xs truncate" x-text="row.target"></span>
-            <button @click="remove(row)" :disabled="busy" class="stage-actions" style="cursor:pointer">Remove</button>
+            <button @click="remove(row)" :disabled="busy" class="stage-actions">Remove</button>
           </div>
         </template>
       </div>
@@ -69,7 +69,7 @@
       </div>
       <p class="field-hint">Twitter/Facebook may need credentials configured under <a href="/connect" style="color:var(--accent)">Connect</a> before they will crawl.</p>
       <div class="flex items-center gap-3 mt-4">
-        <button @click="add()" :disabled="busy || !canAdd" class="stage-actions" style="cursor:pointer">
+        <button @click="add()" :disabled="busy || !canAdd" class="stage-actions">
           <span x-show="!busy">Add</span>
           <span x-show="busy">Adding…</span>
         </button>

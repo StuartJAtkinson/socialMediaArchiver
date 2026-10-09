@@ -97,7 +97,7 @@
     </template>
 
     <div class="mt-4" x-show="posts.length > 0">
-      <button @click="more()" class="stage-actions" style="cursor:pointer"
+      <button @click="more()" class="stage-actions"
               :disabled="loading || !hasMore"
               x-text="hasMore ? (loading ? 'Loading…' : 'Get more posts') : 'No more posts'"></button>
     </div>

@@ -45,7 +45,7 @@
       <div class="flex gap-2">
         <input type="text" class="field-input" placeholder="Search archived post text…"
                x-model="query" @keyup.enter="search()" style="max-width:360px" />
-        <button @click="search()" class="stage-actions" style="cursor:pointer">
+        <button @click="search()" class="stage-actions">
           Search
         </button>
       </div>
@@ -61,7 +61,7 @@
                x-model="filters.account" @keyup.enter="search()" style="max-width:150px" />
         <input type="date" class="field-input" x-model="filters.since" style="max-width:150px" title="Posted on or after" />
         <input type="date" class="field-input" x-model="filters.until" style="max-width:150px" title="Posted on or before" />
-        <button @click="exportResults()" class="stage-actions" style="cursor:pointer"
+        <button @click="exportResults()" class="stage-actions"
                 :disabled="exporting" x-text="exporting ? 'Exporting…' : 'Export these results'"></button>
       </div>
       <p class="field-error mt-2" x-show="searchError" x-text="searchError"></p>

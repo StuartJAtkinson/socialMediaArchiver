@@ -38,7 +38,7 @@
           <p class="field-error mt-2" x-show="errorMsg" x-text="errorMsg"></p>
         </div>
         <div class="flex items-center gap-2">
-          <button @click="start()" :disabled="busy || phase === 'running'" class="stage-actions" style="cursor:pointer">
+          <button @click="start()" :disabled="busy || phase === 'running'" class="stage-actions">
             <span x-show="phase !== 'running'">Run now</span>
             <span x-show="phase === 'running'">Running…</span>
           </button>
