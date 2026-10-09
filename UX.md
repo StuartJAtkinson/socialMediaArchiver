@@ -10,10 +10,10 @@ Dark-only (`color-scheme: dark`, no light theme and no toggle). Tailwind from
 `cdn.tailwindcss.com` for layout utilities, `static/base.css` for every named
 component and every colour, Alpine 3 from jsDelivr for behaviour. No build step.
 
-Tailwind is used for layout and spacing only (`flex`, `grid`, `gap-*`, `p-*`,
-`mb-*`, `text-xs`). Colour never comes from a Tailwind palette class — it comes
-from a CSS variable, either through a component class or an inline
-`style="color:var(--…)"`.
+Tailwind is used for layout and spacing (`flex`, `grid`, `gap-*`, `p-*`,
+`mb-*`, `text-xs`). Colour comes from a CSS variable, through a component class
+or an inline `style="color:var(--…)"` — the one exception is `text-white` on
+panel headings, which is logged as drift in `ISSUES.md`.
 
 ## Colour tokens
 
@@ -62,7 +62,9 @@ that region are separated by `mb-5`; panels sit at `p-4`, empty-state panels at
 - **`.stage-header`** — every page opens with an 18px white `h1` and a 12px
   faint one-line description of what the stage is for.
 - **`.panel` / `.panel-band`** — raised and recessed card surfaces.
-- **`.status`** with `.running` / `.error` / `.done` / `.idle` — pills. Also
+- **`.status`** with `.running` / `.error` / `.done` — pills. The neutral look
+  is the base class itself (`.idle` is no longer styled; templates still add it
+  harmlessly), so an unknown status still renders as a pill. Also
   reused as non-status chips: the source label on a Configure row, and the
   selector pills on Connect and Storage.
 - **`.stage-actions`** — the primary-action button. Works both as a wrapper
@@ -91,8 +93,8 @@ Destructive actions are inline on the row they affect (Configure's per-target
 
 ## Terminology
 
-Six stages, always in this order and always these names: Dashboard, Connect,
-Configure, Storage, Schedule, Run, Browse. Titles read `<Page> — Social Media
+Seven tabs, always in this order and always these names (`TABS` in `web.py`):
+Dashboard, Connect, Configure, Storage, Schedule, Run, Browse. Titles read `<Page> — Social Media
 Archiver` with an em dash. A crawl is a "crawl", never a scrape or a fetch; a
 configured `{source, target}` pair is a "target"; a completed crawl is a "run".
 "Source" is the platform connector, "account" is the thing being archived.
