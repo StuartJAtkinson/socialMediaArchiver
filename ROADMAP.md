@@ -58,9 +58,10 @@ tractable, and search is what makes a large archive worth adding sources to.
       Credentials through the same Connect stage as every other source.
 - [x] Dashboard authentication for non-local deployment — the server binds
       `0.0.0.0:5000` today, so anything on the LAN can read the archive and the
-      stored credentials. Single-user password with a signed session cookie,
-      set at first run; a `--local-only` flag to bind `127.0.0.1` instead.
-      Do this before the dashboard is exposed anywhere beyond the machine.
+      stored credentials. Shipped as HTTP Basic Auth, on only when
+      `DASHBOARD_USERNAME` and `DASHBOARD_PASSWORD` are both set (`web.py`).
+      Kept deliberately simple: no first-run setup, no session cookie, no
+      `--local-only` flag. Set the env vars before exposing it beyond the machine.
 
 ## Later
 
