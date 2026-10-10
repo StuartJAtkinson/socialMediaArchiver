@@ -134,7 +134,7 @@ _METRIC_ALIASES = {
 def _normalize_metrics(metrics):
     out = {}
     for canonical, aliases in _METRIC_ALIASES.items():
-        out[canonical] = next((metrics[k] for k in aliases if k in metrics), 0)
+        out[canonical] = next((metrics[k] for k in aliases if k in metrics), None)
     return out
 
 def _item_to_post(item):

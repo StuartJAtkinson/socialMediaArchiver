@@ -71,10 +71,11 @@
               </template>
             </div>
             <!-- likes/reposts/replies are already normalized per source by web.py _normalize_metrics. -->
-            <div class="post-metrics">
-              <span x-text="'❤️ ' + (post.metrics?.likes || 0)"></span>
-              <span x-text="'🔄 ' + (post.metrics?.reposts || 0)"></span>
-              <span x-text="'💬 ' + (post.metrics?.replies || 0)"></span>
+            <!-- null = the source never records that count; hide it rather than show a fake 0. -->
+            <div class="post-metrics" x-show="post.metrics && Object.values(post.metrics).some(v => v != null)">
+              <span x-show="post.metrics?.likes != null" x-text="'❤️ ' + post.metrics?.likes"></span>
+              <span x-show="post.metrics?.reposts != null" x-text="'🔄 ' + post.metrics?.reposts"></span>
+              <span x-show="post.metrics?.replies != null" x-text="'💬 ' + post.metrics?.replies"></span>
             </div>
           </div>
         </div>

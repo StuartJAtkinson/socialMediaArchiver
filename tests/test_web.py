@@ -153,10 +153,10 @@ def test_normalize_metrics_maps_each_source_to_common_keys():
     assert web._normalize_metrics({'likes': 5, 'retweets': 2, 'replies': 1}) == \
         {'likes': 5, 'reposts': 2, 'replies': 1}
     assert web._normalize_metrics({'score': 9, 'num_comments': 3}) == \
-        {'likes': 9, 'reposts': 0, 'replies': 3}
+        {'likes': 9, 'reposts': None, 'replies': 3}
     assert web._normalize_metrics({'favourites': 4, 'reblogs': 2, 'replies': 1}) == \
         {'likes': 4, 'reposts': 2, 'replies': 1}
-    assert web._normalize_metrics({}) == {'likes': 0, 'reposts': 0, 'replies': 0}
+    assert web._normalize_metrics({}) == {'likes': None, 'reposts': None, 'replies': None}
 
 
 def test_account_page_shows_non_twitter_metrics(tmp_path, monkeypatch):
