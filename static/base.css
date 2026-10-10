@@ -203,13 +203,16 @@ button.stage-actions:disabled {
   border: 1px solid var(--status-running-border);
 }
 
-.status.error {
+/* run history (core/run_history.py) records failed/completed, live progress error/done. */
+.status.error,
+.status.failed {
   background: var(--status-error-bg);
   color: var(--status-error-fg);
   border: 1px solid var(--status-error-border);
 }
 
-.status.done {
+.status.done,
+.status.completed {
   background: var(--status-done-bg);
   color: var(--status-done-fg);
   border: 1px solid var(--status-done-border);

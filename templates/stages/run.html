@@ -70,7 +70,7 @@
       <div class="space-y-1" x-show="history.length > 0">
         <template x-for="h in history" :key="h.id || h.started_at">
           <div class="text-muted text-xs flex items-center gap-2">
-            <span class="status idle" x-text="h.status || 'unknown'"></span>
+            <span class="status" :class="h.status" x-text="h.status || 'unknown'"></span>
             <span x-text="h.trigger || 'manual'"></span>
             <span class="flex-1" x-text="fmt(h.started_at)"></span>
             <span x-show="h.totals" x-text="h.totals && (h.totals.items || 0) + ' items'"></span>
