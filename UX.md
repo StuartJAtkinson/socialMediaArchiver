@@ -67,7 +67,9 @@ that region are separated by `mb-5`; panels sit at `p-4`, empty-state panels at
 - **`.panel-title`** — every panel's `h2`: 14px semibold `--heading`, 12px
   below. The two headings that share a flex row with a count or button
   (Configure's Targets, Run's status) keep the longhand with no margin.
-- **`.status`** with `.running` / `.error` / `.done` — pills. The neutral look
+- **`.status`** with `.running` / `.error` / `.done` — pills. Run history's
+  own names `.failed` and `.completed` share the error and done styles, so a
+  history row binds its stored status directly. The neutral look
   is the base class itself (`.idle` is no longer styled; templates still add it
   harmlessly), so an unknown status still renders as a pill. Also
   reused as non-status chips: the source label on a Configure row, and the
