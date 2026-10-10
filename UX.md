@@ -86,8 +86,9 @@ its "Run now" button sits top-right of the status panel, beside the state it
 acts on.
 
 One-of-N selectors (Connect's source, Storage's backend) are a `.source-tabs`
-strip inside the stage's panel, under a `.field-label`, with the selected
-item's form below it in the same panel.
+strip inside the stage's panel, and both panels run in the same order: the
+`.panel-title` heading ("Credentials", "Storage location"), the `.field-label`,
+the tabs, then the selected item's form below them in the same panel.
 
 Long lists page two ways, deliberately. The account page's post list uses an
 explicit `Get more posts` button; Browse's search results use infinite scroll
