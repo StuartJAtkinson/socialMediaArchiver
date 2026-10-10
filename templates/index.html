@@ -40,11 +40,16 @@
 
     <!-- Quick actions + recent runs -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <div class="panel p-4 lg:col-span-2">
+      <template x-if="recent.length === 0">
+        <div class="panel p-5 lg:col-span-2">
+          <h3 class="text-sm font-semibold text-heading mb-1">No runs yet</h3>
+          <p class="text-muted text-xs">
+            Go to <a class="link" href="/run">Run</a> to start a crawl.
+          </p>
+        </div>
+      </template>
+      <div class="panel p-4 lg:col-span-2" x-show="recent.length > 0">
         <h2 class="panel-title">Recent runs</h2>
-        <template x-if="recent.length === 0">
-          <p class="text-faint text-xs">No runs yet. Go to <a class="link" href="/run">Run</a> to start one.</p>
-        </template>
         <template x-for="run in recent" :key="run.id">
           <div class="flex items-center justify-between py-1.5 border-b" style="border-color:var(--border-soft)">
             <div>
